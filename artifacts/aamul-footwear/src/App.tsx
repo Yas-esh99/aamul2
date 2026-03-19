@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Newsletter from "@/components/layout/Newsletter";
 import Home from "@/pages/Home";
 import HandmadeMojdi from "@/pages/HandmadeMojdi";
 import About from "@/pages/About";
@@ -23,6 +24,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </AnimatePresence>
       </main>
+      <Newsletter />
       <Footer />
     </div>
   );
