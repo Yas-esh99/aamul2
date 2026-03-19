@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For smooth page transitions, scroll animations, and premium micro-interactions."
+  "lucide-react": "For beautiful consistent icons across the application."
+
+images:
+  - path: "artifacts/aamul-footwear/public/images/hero-artisan.png"
+    description: "Close-up aesthetic shot of an artisan's wooden workbench with leather crafting tools, swatches of rich brown leather, warm natural sunlight streaming in, high-end editorial photography."
+    aspect_ratio: "16:9"
+  - path: "artifacts/aamul-footwear/public/images/mojdi-hero.png"
+    description: "A beautifully crafted traditional Indian Mojdi shoe with intricate gold and terracotta embroidery, resting on a textured linen cloth in soft moody lighting, elegant and premium."
+    aspect_ratio: "16:9"
+  - path: "artifacts/aamul-footwear/public/images/craft-hands.png"
+    description: "Close up of artisan hands carefully stitching thick brown leather with a needle and thread, warm earthy tones, cinematic depth of field."
+    aspect_ratio: "3:4"
+  - path: "artifacts/aamul-footwear/public/images/about-workshop.png"
+    description: "A beautiful, rustic leather workshop interior with shelves of wooden shoe lasts, warm terracotta walls, vintage aesthetic, soft natural light."
+    aspect_ratio: "16:9"
+
+notes:
+  - This is a static frontend. Using mock data for products.
+  - Relying on framer-motion for all scroll reveals to give a high-end feel.

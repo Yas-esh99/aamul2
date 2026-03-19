@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Aamul Footwear"
+version = "1.0.0"
+id = "artifacts/aamul-footwear"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24860
+
+[services.development]
+run = "pnpm --filter @workspace/aamul-footwear run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aamul-footwear", "run", "build" ]
+publicDir = "artifacts/aamul-footwear/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24860"
+BASE_PATH = "/"
