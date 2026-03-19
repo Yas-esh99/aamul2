@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, ShoppingBag, CheckCircle, Package, MapPin, Ruler } from "lucide-react";
 import { products } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
+import { ProductCard } from "@/components/ui/ProductCard";
 
 interface ProductDetailProps {
   id: string;
@@ -15,6 +16,10 @@ export default function ProductDetail({ id }: ProductDetailProps) {
   const product = products.find((p) => p.id === id);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [activeImage, setActiveImage] = useState(0);
+
+  const relatedProducts = product
+    ? products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3)
+    : [];
 
   if (!product) {
     return (
@@ -219,6 +224,34 @@ export default function ProductDetail({ id }: ProductDetailProps) {
           </motion.div>
         </div>
       </div>
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 pb-20">
+          <div className="border-t border-border pt-14">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="mb-8"
+            >
+              <span className="text-xs uppercase tracking-widest text-primary font-semibold">
+                You May Also Like
+              </span>
+              <h2 className="mt-2 text-2xl font-bold text-foreground">
+                Related Products
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedProducts.map((related, i) => (
+                <ProductCard key={related.id} product={related} index={i} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
