@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
-import type { Product } from "@/lib/data";
+import type { Product } from "@/lib/products";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {

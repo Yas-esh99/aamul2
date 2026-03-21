@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { ArrowLeft, ShoppingBag, CheckCircle, Package, MapPin, Ruler } from "lucide-react";
-import { products } from "@/lib/data";
+import { ArrowLeft, ShoppingBag, CheckCircle, Package, MapPin, Ruler, Loader2 } from "lucide-react";
+import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCard } from "@/components/ui/ProductCard";
 
@@ -13,28 +13,32 @@ interface ProductDetailProps {
 export default function ProductDetail({ id }: ProductDetailProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const product = products.find((p) => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [activeImage, setActiveImage] = useState(0);
 
-  const relatedProducts = product
-    ? products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3)
-    : [];
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setSelectedSize(null);
+    setActiveImage(0);
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-6">
-        <h2 className="text-3xl font-bold text-foreground">Product Not Found</h2>
-        <p className="text-muted-foreground">This product doesn't seem to exist.</p>
-        <button
-          onClick={() => navigate("/")}
-          className="mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-opacity"
-        >
-          Back to Products
-        </button>
-      </div>
-    );
-  }
+    fetchProductById(id)
+      .then(async (p) => {
+        if (!p) {
+          setError("Product not found.");
+          return;
+        }
+        setProduct(p);
+        const rel = await fetchProductsByCategory(p.category, p.id, 3);
+        setRelated(rel);
+      })
+      .catch(() => setError("Failed to load product."))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -47,16 +51,42 @@ export default function ProductDetail({ id }: ProductDetailProps) {
     }
     toast({
       title: "Added to Bag",
-      description: `${product.name} (Size ${selectedSize}) has been added to your bag.`,
+      description: `${product?.name} (Size ${selectedSize}) has been added to your bag.`,
     });
   };
 
-  const categoryLabel: Record<string, string> = {
-    mojdi: "Mojdi",
-    sandal: "Sandal",
-    loafer: "Loafer",
-    boot: "Boot",
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-6">
+        <h2 className="text-3xl font-bold text-foreground">
+          {error === "Product not found." ? "Product Not Found" : "Something went wrong"}
+        </h2>
+        <p className="text-muted-foreground">{error ?? "An unexpected error occurred."}</p>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-opacity"
+        >
+          Back to Products
+        </button>
+      </div>
+    );
+  }
+
+  const gallery: string[] = product.gallery?.length ? product.gallery : [product.image];
+  const categoryLabel = product.category
+    ? product.category.charAt(0).toUpperCase() + product.category.slice(1)
+    : "Product";
 
   return (
     <motion.div
@@ -95,16 +125,15 @@ export default function ProductDetail({ id }: ProductDetailProps) {
                 </div>
               )}
               <img
-                src={product.gallery[activeImage]}
+                src={gallery[activeImage]}
                 alt={product.name}
                 className="w-full h-full object-cover transition-all duration-500"
               />
             </div>
 
-            {/* Thumbnail Row */}
-            {product.gallery.length > 1 && (
+            {gallery.length > 1 && (
               <div className="flex gap-3">
-                {product.gallery.map((img, i) => (
+                {gallery.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}
@@ -128,58 +157,66 @@ export default function ProductDetail({ id }: ProductDetailProps) {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="flex flex-col gap-6"
           >
-            {/* Category + Name */}
             <div>
               <span className="text-xs uppercase tracking-widest text-primary font-semibold">
-                {categoryLabel[product.category]}
+                {categoryLabel}
               </span>
               <h1 className="mt-2 text-4xl font-bold text-foreground leading-tight">
                 {product.name}
               </h1>
-              <p className="mt-3 text-3xl font-semibold text-primary">${product.price}</p>
+              <p className="mt-3 text-3xl font-semibold text-primary">
+                {typeof product.price === "number"
+                  ? `$${product.price}`
+                  : product.price}
+              </p>
             </div>
 
-            {/* Description */}
             <p className="text-muted-foreground leading-relaxed text-base">
-              {product.longDescription}
+              {product.longDescription || product.description}
             </p>
 
-            {/* Origin & Material badges */}
+            {/* Badges */}
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                <MapPin className="w-4 h-4 text-primary" />
-                {product.origin}
-              </div>
-              <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                <Package className="w-4 h-4 text-primary" />
-                {product.material}
-              </div>
+              {product.origin && (
+                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  {product.origin}
+                </div>
+              )}
+              {product.material && (
+                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
+                  <Package className="w-4 h-4 text-primary" />
+                  {product.material}
+                </div>
+              )}
             </div>
 
             {/* Size Selector */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Ruler className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                  Select Size (UK)
-                </span>
+            {product.sizes?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Ruler className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                    Select Size (UK)
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-12 h-12 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${
+                        selectedSize === size
+                          ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
+                          : "border-border text-foreground hover:border-primary/60 hover:bg-muted"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${
-                      selectedSize === size
-                        ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
-                        : "border-border text-foreground hover:border-primary/60 hover:bg-muted"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* Add to Bag */}
             <motion.button
@@ -192,41 +229,47 @@ export default function ProductDetail({ id }: ProductDetailProps) {
             </motion.button>
 
             {/* Features */}
-            <div className="border-t border-border pt-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
-                What Makes It Special
-              </h3>
-              <ul className="space-y-3">
-                {product.features.map((f, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {product.features?.length > 0 && (
+              <div className="border-t border-border pt-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
+                  What Makes It Special
+                </h3>
+                <ul className="space-y-3">
+                  {product.features.map((f, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Care Instructions */}
-            <div className="bg-muted/40 rounded-2xl p-5">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2">
-                Care Instructions
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {product.careInstructions}
-              </p>
-            </div>
+            {product.careInstructions && (
+              <div className="bg-muted/40 rounded-2xl p-5">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2">
+                  Care Instructions
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {product.careInstructions}
+                </p>
+              </div>
+            )}
 
             {/* Sole */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground border-t border-border pt-4">
-              <span className="font-medium text-foreground">Sole:</span>
-              {product.sole}
-            </div>
+            {product.sole && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground border-t border-border pt-4">
+                <span className="font-medium text-foreground">Sole:</span>
+                {product.sole}
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
+      {related.length > 0 && (
         <div className="max-w-7xl mx-auto px-6 pb-20">
           <div className="border-t border-border pt-14">
             <motion.div
@@ -245,8 +288,8 @@ export default function ProductDetail({ id }: ProductDetailProps) {
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedProducts.map((related, i) => (
-                <ProductCard key={related.id} product={related} index={i} />
+              {related.map((rel, i) => (
+                <ProductCard key={rel.id} product={rel} index={i} />
               ))}
             </div>
           </div>

@@ -24,3 +24,13 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyAYdEA7KACh6G-2NAclMCJ6kXjdWn0DXCI"
+VITE_FIREBASE_AUTH_DOMAIN = "aamul-bf97e.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID = "aamul-bf97e"
+VITE_FIREBASE_STORAGE_BUCKET = "aamul-bf97e.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "716264597413"
+VITE_FIREBASE_APP_ID = "1:716264597413:web:32a553592be7f784dcea4c"

@@ -1,25 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { products } from "@/lib/data";
-import { ProductCard } from "@/components/ui/ProductCard";
-import { ArrowRight, Search, X } from "lucide-react";
+import { ArrowRight, Search, X, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { fetchAllProducts, filterProducts, type Product } from "@/lib/products";
+import { ProductCard } from "@/components/ui/ProductCard";
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = query.trim()
-    ? products.filter((p) => {
-        const q = query.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.material.toLowerCase().includes(q) ||
-          p.origin.toLowerCase().includes(q)
-        );
+  useEffect(() => {
+    fetchAllProducts()
+      .then(setProducts)
+      .catch((e) => {
+        console.error(e);
+        setError("Failed to load products. Please try again.");
       })
-    : products;
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = query.trim() ? filterProducts(products, query) : products;
 
   return (
     <div className="min-h-screen bg-background pt-20">
@@ -108,9 +110,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Result count */}
           <AnimatePresence>
-            {query.trim() && (
+            {query.trim() && !loading && (
               <motion.p
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -126,46 +127,76 @@ export default function Home() {
           </AnimatePresence>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-muted-foreground">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm">Loading products...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+            <p className="text-destructive font-medium">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                fetchAllProducts()
+                  .then(setProducts)
+                  .catch(() => setError("Failed to load products."))
+                  .finally(() => setLoading(false));
+              }}
+              className="px-5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
         {/* Product Grid */}
-        <AnimatePresence mode="wait">
-          {filtered.length > 0 ? (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
-            >
-              {filtered.map((product, idx) => (
-                <ProductCard key={product.id} product={product} index={idx} />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center justify-center py-24 text-center"
-            >
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
-                <Search className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No results found</h3>
-              <p className="text-muted-foreground text-sm max-w-xs">
-                Try searching for a different name, category like "mojdi" or "sandal", or material like "suede".
-              </p>
-              <button
-                onClick={() => setQuery("")}
-                className="mt-6 px-6 py-2.5 rounded-xl border border-border text-foreground text-sm font-medium hover:bg-muted transition-colors"
+        {!loading && !error && (
+          <AnimatePresence mode="wait">
+            {filtered.length > 0 ? (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
               >
-                Clear Search
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {filtered.map((product, idx) => (
+                  <ProductCard key={product.id} product={product} index={idx} />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center justify-center py-24 text-center"
+              >
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
+                  <Search className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">No results found</h3>
+                <p className="text-muted-foreground text-sm max-w-xs">
+                  Try searching for a different name, category like "mojdi" or "sandal", or material.
+                </p>
+                <button
+                  onClick={() => setQuery("")}
+                  className="mt-6 px-6 py-2.5 rounded-xl border border-border text-foreground text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  Clear Search
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </section>
 
       {/* Process Banner */}
