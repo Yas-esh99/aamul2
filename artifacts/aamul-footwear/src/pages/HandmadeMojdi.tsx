@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { fetchAllProducts, type Product } from "@/lib/products";
+import { ProductCard } from "@/components/ui/ProductCard";
 
 const processSteps = [
   {
@@ -22,12 +25,28 @@ const processSteps = [
 ];
 
 export default function HandmadeMojdi() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAllProducts()
+      .then((all) => {
+        const mojdi = all.filter((p) =>
+          p.type?.toLowerCase().includes("mojdi") ||
+          p.class?.toLowerCase().includes("mojdi")
+        );
+        setProducts(mojdi);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
@@ -45,13 +64,13 @@ export default function HandmadeMojdi() {
         </motion.div>
 
         {/* Hero Feature */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
           className="relative w-full aspect-[21/9] min-h-[400px] rounded-3xl overflow-hidden mb-24 shadow-2xl shadow-primary/10"
         >
-          <img 
+          <img
             src={`${import.meta.env.BASE_URL}images/mojdi-hero.png`}
             alt="Beautiful handmade Mojdi"
             className="w-full h-full object-cover"
@@ -80,54 +99,51 @@ export default function HandmadeMojdi() {
                 </div>
                 <div className="relative z-10">
                   <h3 className="text-xl font-bold text-foreground mb-4 font-display">{step.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {step.desc}
-                  </p>
+                  <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Gallery / Moodboard */}
+        {/* The Collection — Live from Firestore */}
         <div>
-          <h2 className="font-display text-4xl font-bold text-foreground mb-12">The Collection</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Using stock placeholders to simulate a varied gallery */}
-            <motion.div 
-              whileHover={{ scale: 0.98 }}
-              className="md:col-span-2 aspect-[4/3] rounded-2xl overflow-hidden bg-muted"
-            >
-              {/* traditional shoes Unsplash */}
-              <img src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=1200&q=80" className="w-full h-full object-cover" alt="Mojdi detail" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 0.98 }}
-              className="aspect-[4/3] md:aspect-auto rounded-2xl overflow-hidden bg-muted"
-            >
-              {/* leather texture Unsplash */}
-              <img src="https://pixabay.com/get/g15a7b18c4b0e7f62f807cca5b4f8d1ab73989992dc66dd07a317b29dc1853430f3d66751a9e446f2d9807c04280103402bf686827d7550fdb3b489ee49fa2743_1280.jpg" className="w-full h-full object-cover" alt="Leather material" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 0.98 }}
-              className="aspect-square rounded-2xl overflow-hidden bg-muted"
-            >
-              {/* colorful embroidery Unsplash */}
-              <img src="https://pixabay.com/get/g945dafcb2a7fee567631249544a1336f279564b3b23cb18ab424d2d708825f44d391557660538caaede1ddd7ac35996ce0f71feddf2680900a860c83f10f3672_1280.jpg" className="w-full h-full object-cover" alt="Embroidery detail" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 0.98 }}
-              className="md:col-span-2 aspect-[21/9] rounded-2xl overflow-hidden bg-muted"
-            >
-              {/* artisan shoes Unsplash */}
-              <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&q=80" className="w-full h-full object-cover" alt="Finished Mojdi" />
-            </motion.div>
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <span className="text-xs uppercase tracking-widest text-primary font-semibold block mb-2">
+                Our Work
+              </span>
+              <h2 className="font-display text-4xl font-bold text-foreground">The Collection</h2>
+            </div>
+            <Link href="/">
+              <button className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                View All Products →
+              </button>
+            </Link>
           </div>
-          
+
+          {loading ? (
+            <div className="flex items-center justify-center py-24 text-muted-foreground gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span>Loading collection...</span>
+            </div>
+          ) : products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-muted-foreground">
+              <p className="text-lg">No Mojdi products found yet.</p>
+              <p className="text-sm mt-2">Add products with type "mojdi" in Firestore to see them here.</p>
+            </div>
+          )}
+
           <div className="mt-16 text-center">
             <Link href="/">
               <button className="bg-foreground text-background px-8 py-4 rounded-xl font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-xl hover:shadow-primary/25">
-                Shop The Collection
+                Shop The Full Collection
               </button>
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { ShoppingBag, ArrowRight, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Product } from "@/lib/products";
 import { useToast } from "@/hooks/use-toast";
@@ -17,13 +17,15 @@ export function ProductCard({ product, index }: ProductCardProps) {
     e.stopPropagation();
     toast({
       title: "Added to Bag",
-      description: `${product.name} has been added to your bag.`,
+      description: `${product.title} has been added to your bag.`,
     });
   };
 
   const handleCardClick = () => {
     navigate(`/product/${product.id}`);
   };
+
+  const mainImage = product.img_url?.[0] ?? "";
 
   return (
     <motion.div
@@ -34,18 +36,27 @@ export function ProductCard({ product, index }: ProductCardProps) {
       onClick={handleCardClick}
       className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-border/50 cursor-pointer transition-shadow duration-300 hover:shadow-xl"
     >
+      {/* Image */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-        {product.isNew && (
-          <div className="absolute top-4 left-4 z-10 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            New
+        {product.img_url?.length > 0 ? (
+          <img
+            src={mainImage}
+            alt={product.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+            No image
           </div>
         )}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
+
+        {/* Type badge */}
+        {product.type && (
+          <div className="absolute top-4 left-4 z-10 bg-background/80 backdrop-blur text-foreground text-xs font-semibold px-3 py-1 rounded-full capitalize">
+            {product.type}
+          </div>
+        )}
 
         {/* Quick Add Overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
@@ -59,19 +70,44 @@ export function ProductCard({ product, index }: ProductCardProps) {
         </div>
       </div>
 
+      {/* Info */}
       <div className="p-5 flex flex-col flex-grow">
+        {/* Company */}
+        {product.company && (
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            {product.company}
+          </p>
+        )}
+
         <div className="flex justify-between items-start mb-2 gap-4">
-          <h3 className="font-display text-xl font-bold text-foreground leading-tight">
-            {product.name}
+          <h3 className="font-display text-lg font-bold text-foreground leading-tight">
+            {product.title}
           </h3>
-          <span className="font-medium text-primary whitespace-nowrap">
-            ${product.price}
-          </span>
+          {product.price != null && (
+            <span className="font-medium text-primary whitespace-nowrap">
+              ${product.price}
+            </span>
+          )}
         </div>
-        <p className="text-muted-foreground text-sm leading-relaxed mt-1 flex-grow">
+
+        <p className="text-muted-foreground text-sm leading-relaxed mt-1 flex-grow line-clamp-2">
           {product.description}
         </p>
-        <div className="mt-4 flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+        {/* Rating + Color row */}
+        <div className="mt-3 flex items-center justify-between">
+          {product.rating != null && (
+            <div className="flex items-center gap-1 text-amber-500">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              <span className="text-xs font-medium text-foreground">{product.rating}</span>
+            </div>
+          )}
+          {product.color && (
+            <span className="text-xs text-muted-foreground capitalize">{product.color}</span>
+          )}
+        </div>
+
+        <div className="mt-3 flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           View Details <ArrowRight className="w-4 h-4" />
         </div>
       </div>
