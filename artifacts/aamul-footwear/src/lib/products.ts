@@ -63,6 +63,16 @@ export async function fetchProductsByType(
     .slice(0, limitCount);
 }
 
+export interface MojdiDoc {
+  id: string;
+  img_url: string[];
+}
+
+export async function fetchMojdiGallery(): Promise<MojdiDoc[]> {
+  const snap = await getDocs(collection(db, "mojdi"));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as MojdiDoc));
+}
+
 export function filterProducts(products: Product[], searchQuery: string): Product[] {
   const q = searchQuery.toLowerCase();
   return products.filter(
