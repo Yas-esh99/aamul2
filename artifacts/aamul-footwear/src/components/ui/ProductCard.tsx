@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShoppingBag, ArrowRight, Star } from "lucide-react";
+import { ShoppingBag, Star, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Product } from "@/lib/products";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 interface ProductCardProps {
   product: Product;
   index: number;
+}
+
+function badge(text?: string) {
+  if (!text) return null;
+  return text
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
@@ -21,10 +28,6 @@ export function ProductCard({ product, index }: ProductCardProps) {
     });
   };
 
-  const handleCardClick = () => {
-    navigate(`/product/${product.id}`);
-  };
-
   const mainImage = product.img_url?.[0] ?? "";
 
   return (
@@ -33,12 +36,12 @@ export function ProductCard({ product, index }: ProductCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      onClick={handleCardClick}
+      onClick={() => navigate(`/product/${product.id}`)}
       className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-border/50 cursor-pointer transition-shadow duration-300 hover:shadow-xl"
     >
       {/* Image */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-        {product.img_url?.length > 0 ? (
+        {mainImage ? (
           <img
             src={mainImage}
             alt={product.title}
@@ -51,14 +54,21 @@ export function ProductCard({ product, index }: ProductCardProps) {
           </div>
         )}
 
-        {/* Type badge */}
-        {product.type && (
-          <div className="absolute top-4 left-4 z-10 bg-background/80 backdrop-blur text-foreground text-xs font-semibold px-3 py-1 rounded-full capitalize">
-            {product.type}
-          </div>
-        )}
+        {/* Badges row */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+          {product.category && (
+            <span className="bg-background/85 backdrop-blur text-foreground text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize">
+              {badge(product.category)}
+            </span>
+          )}
+          {product.made_with && (
+            <span className="bg-primary/90 text-primary-foreground text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize">
+              {badge(product.made_with)}
+            </span>
+          )}
+        </div>
 
-        {/* Quick Add Overlay */}
+        {/* Hover add-to-bag */}
         <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           <button
             onClick={handleAddToCart}
@@ -72,38 +82,48 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
       {/* Info */}
       <div className="p-5 flex flex-col flex-grow">
-        {/* Company */}
-        {product.company && (
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-            {product.company}
+        {/* Brand */}
+        {product.brand && (
+          <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-1">
+            {product.brand}
           </p>
         )}
 
-        <div className="flex justify-between items-start mb-2 gap-4">
-          <h3 className="font-display text-lg font-bold text-foreground leading-tight">
+        {/* Title + Price */}
+        <div className="flex justify-between items-start gap-3 mb-2">
+          <h3 className="font-display text-base font-bold text-foreground leading-snug">
             {product.title}
           </h3>
           {product.price != null && (
-            <span className="font-medium text-primary whitespace-nowrap">
-              ${product.price}
+            <span className="font-semibold text-primary whitespace-nowrap text-sm">
+              ₹{product.price}
             </span>
           )}
         </div>
 
-        <p className="text-muted-foreground text-sm leading-relaxed mt-1 flex-grow line-clamp-2">
+        <p className="text-muted-foreground text-sm leading-relaxed flex-grow line-clamp-2">
           {product.description}
         </p>
 
-        {/* Rating + Color row */}
-        <div className="mt-3 flex items-center justify-between">
-          {product.rating != null && (
-            <div className="flex items-center gap-1 text-amber-500">
-              <Star className="w-3.5 h-3.5 fill-current" />
-              <span className="text-xs font-medium text-foreground">{product.rating}</span>
-            </div>
-          )}
-          {product.color && (
-            <span className="text-xs text-muted-foreground capitalize">{product.color}</span>
+        {/* Meta row */}
+        <div className="mt-3 flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            {product.rating != null && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                <span className="text-xs font-medium text-foreground">{product.rating}</span>
+              </div>
+            )}
+            {product.ideal_for && (
+              <span className="text-xs text-muted-foreground capitalize">
+                · {product.ideal_for}
+              </span>
+            )}
+          </div>
+          {product.occasion && (
+            <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full capitalize">
+              {badge(product.occasion)}
+            </span>
           )}
         </div>
 

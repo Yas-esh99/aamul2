@@ -13,19 +13,30 @@ export interface Product {
   id: string;
   title: string;
   description: string;
-  class: string;
+  brand: string;
+  category: string;
   color: string;
-  company: string;
   img_url: string[];
   is_visible: boolean;
   size_ava: string[] | number[];
   rating: number;
-  shape: string;
   type: string;
   sole_material: string;
   up_material: string;
   weight: number;
-  price?: number;
+  price: number;
+  fastening_and_back?: string;
+  toe_shape?: string;
+  occasion?: string;
+  ideal_for?: string;
+  heel?: number;
+  made_with?: string;
+  country_of_origin?: string;
+}
+
+export interface MojdiDoc {
+  id: string;
+  img_url: string[];
 }
 
 const COLLECTION = "products";
@@ -45,14 +56,14 @@ export async function fetchProductById(id: string): Promise<Product | null> {
   return { id: snap.id, ...snap.data() } as Product;
 }
 
-export async function fetchProductsByType(
-  type: string,
+export async function fetchProductsByCategory(
+  category: string,
   excludeId?: string,
   limitCount = 3
 ): Promise<Product[]> {
   const q = query(
     collection(db, COLLECTION),
-    where("type", "==", type),
+    where("category", "==", category),
     where("is_visible", "==", true),
     limit(limitCount + (excludeId ? 1 : 0))
   );
@@ -61,11 +72,6 @@ export async function fetchProductsByType(
     .map((d) => ({ id: d.id, ...d.data() } as Product))
     .filter((p) => p.id !== excludeId)
     .slice(0, limitCount);
-}
-
-export interface MojdiDoc {
-  id: string;
-  img_url: string[];
 }
 
 export async function fetchMojdiGallery(): Promise<MojdiDoc[]> {
@@ -80,11 +86,14 @@ export function filterProducts(products: Product[], searchQuery: string): Produc
       p.title?.toLowerCase().includes(q) ||
       p.description?.toLowerCase().includes(q) ||
       p.type?.toLowerCase().includes(q) ||
-      p.class?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q) ||
+      p.brand?.toLowerCase().includes(q) ||
       p.color?.toLowerCase().includes(q) ||
-      p.company?.toLowerCase().includes(q) ||
       p.up_material?.toLowerCase().includes(q) ||
       p.sole_material?.toLowerCase().includes(q) ||
-      p.shape?.toLowerCase().includes(q)
+      p.toe_shape?.toLowerCase().includes(q) ||
+      p.occasion?.toLowerCase().includes(q) ||
+      p.ideal_for?.toLowerCase().includes(q) ||
+      p.made_with?.toLowerCase().includes(q)
   );
 }

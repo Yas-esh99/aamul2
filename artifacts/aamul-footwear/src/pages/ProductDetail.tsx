@@ -2,15 +2,20 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
-  ArrowLeft, ShoppingBag, CheckCircle, Package,
-  Ruler, Loader2, Star, Palette, Building2, Weight
+  ArrowLeft, ShoppingBag, Loader2, Star,
+  Ruler, Package, MapPin, Tag, Heart, Zap
 } from "lucide-react";
-import { fetchProductById, fetchProductsByType, type Product } from "@/lib/products";
+import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCard } from "@/components/ui/ProductCard";
 
 interface ProductDetailProps {
   id: string;
+}
+
+function readable(val?: string) {
+  if (!val) return "";
+  return val.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function ProductDetail({ id }: ProductDetailProps) {
@@ -33,8 +38,8 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       .then(async (p) => {
         if (!p) { setError("Product not found."); return; }
         setProduct(p);
-        if (p.type) {
-          const rel = await fetchProductsByType(p.type, p.id, 3);
+        if (p.category) {
+          const rel = await fetchProductsByCategory(p.category, p.id, 3);
           setRelated(rel);
         }
       })
@@ -47,7 +52,7 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       toast({ title: "Please select a size", description: "Choose your size before adding to bag.", variant: "destructive" });
       return;
     }
-    toast({ title: "Added to Bag", description: `${product?.title} (Size ${selectedSize}) has been added to your bag.` });
+    toast({ title: "Added to Bag", description: `${product?.title} (Size ${selectedSize}) added to bag.` });
   };
 
   if (loading) {
@@ -64,11 +69,9 @@ export default function ProductDetail({ id }: ProductDetailProps) {
   if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-6">
-        <h2 className="text-3xl font-bold text-foreground">
-          {error === "Product not found." ? "Product Not Found" : "Something went wrong"}
-        </h2>
-        <p className="text-muted-foreground">{error ?? "An unexpected error occurred."}</p>
-        <button onClick={() => navigate("/")} className="mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-opacity">
+        <h2 className="text-3xl font-bold">{error === "Product not found." ? "Product Not Found" : "Something went wrong"}</h2>
+        <p className="text-muted-foreground">{error}</p>
+        <button onClick={() => navigate("/")} className="mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90">
           Back to Products
         </button>
       </div>
@@ -76,6 +79,23 @@ export default function ProductDetail({ id }: ProductDetailProps) {
   }
 
   const images = product.img_url?.length ? product.img_url : [];
+
+  const specs = [
+    { label: "Brand", value: product.brand },
+    { label: "Category", value: readable(product.category) },
+    { label: "Type", value: readable(product.type) },
+    { label: "Ideal For", value: readable(product.ideal_for) },
+    { label: "Occasion", value: readable(product.occasion) },
+    { label: "Color", value: readable(product.color) },
+    { label: "Upper Material", value: product.up_material },
+    { label: "Sole Material", value: product.sole_material },
+    { label: "Toe Shape", value: readable(product.toe_shape) },
+    { label: "Fastening", value: readable(product.fastening_and_back) },
+    { label: "Heel Height", value: product.heel != null ? `${product.heel} cm` : undefined },
+    { label: "Made With", value: readable(product.made_with) },
+    { label: "Origin", value: readable(product.country_of_origin) },
+    { label: "Weight", value: product.weight != null ? `${product.weight}g` : undefined },
+  ].filter((s) => s.value);
 
   return (
     <motion.div
@@ -96,11 +116,11 @@ export default function ProductDetail({ id }: ProductDetailProps) {
         </button>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
 
-          {/* Image Gallery */}
+          {/* Gallery */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -112,12 +132,10 @@ export default function ProductDetail({ id }: ProductDetailProps) {
                 <img
                   src={images[activeImage]}
                   alt={product.title}
-                  className="w-full h-full object-cover transition-all duration-500"
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                  No image available
-                </div>
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">No image</div>
               )}
             </div>
 
@@ -131,83 +149,96 @@ export default function ProductDetail({ id }: ProductDetailProps) {
                       activeImage === i ? "border-primary shadow-md" : "border-border/40 opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <img src={img} alt={`${product.title} view ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
           </motion.div>
 
-          {/* Product Info */}
+          {/* Info */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-5"
           >
-            {/* Type + Title */}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                {product.type && (
-                  <span className="text-xs uppercase tracking-widest text-primary font-semibold">
-                    {product.type}
-                  </span>
-                )}
-                {product.class && (
-                  <span className="text-xs text-muted-foreground">· {product.class}</span>
-                )}
-              </div>
-              <h1 className="text-4xl font-bold text-foreground leading-tight">{product.title}</h1>
-              {product.company && (
-                <p className="mt-1 text-sm text-muted-foreground font-medium">{product.company}</p>
+            {/* Brand + badges */}
+            <div className="flex flex-wrap items-center gap-2">
+              {product.brand && (
+                <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+                  {product.brand}
+                </span>
               )}
-              {product.price != null && (
-                <p className="mt-3 text-3xl font-semibold text-primary">${product.price}</p>
+              {product.made_with && (
+                <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full capitalize">
+                  {readable(product.made_with)}
+                </span>
+              )}
+              {product.ideal_for && (
+                <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full capitalize">
+                  {readable(product.ideal_for)}
+                </span>
               )}
             </div>
 
-            {/* Rating */}
-            {product.rating != null && (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-4 h-4 ${star <= Math.round(product.rating) ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`}
-                    />
-                  ))}
+            {/* Title */}
+            <div>
+              <h1 className="text-4xl font-bold text-foreground leading-tight">{product.title}</h1>
+              {product.category && (
+                <p className="mt-1 text-sm text-muted-foreground capitalize">{readable(product.category)}</p>
+              )}
+            </div>
+
+            {/* Price + Rating */}
+            <div className="flex items-center gap-4">
+              {product.price != null && (
+                <p className="text-3xl font-bold text-primary">₹{product.price}</p>
+              )}
+              {product.rating != null && (
+                <div className="flex items-center gap-1.5">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">{product.rating}/5</span>
                 </div>
-                <span className="text-sm font-medium text-foreground">{product.rating}/5</span>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Description */}
-            <p className="text-muted-foreground leading-relaxed text-base">{product.description}</p>
+            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
 
-            {/* Attribute badges */}
-            <div className="flex flex-wrap gap-3">
-              {product.color && (
-                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                  <Palette className="w-4 h-4 text-primary" />
-                  {product.color}
+            {/* Quick-info chips */}
+            <div className="flex flex-wrap gap-2">
+              {product.occasion && (
+                <div className="flex items-center gap-1.5 bg-muted/70 px-3 py-1.5 rounded-full text-sm">
+                  <Heart className="w-3.5 h-3.5 text-primary" />
+                  <span className="capitalize">{readable(product.occasion)}</span>
+                </div>
+              )}
+              {product.fastening_and_back && (
+                <div className="flex items-center gap-1.5 bg-muted/70 px-3 py-1.5 rounded-full text-sm">
+                  <Zap className="w-3.5 h-3.5 text-primary" />
+                  <span className="capitalize">{readable(product.fastening_and_back)}</span>
+                </div>
+              )}
+              {product.toe_shape && (
+                <div className="flex items-center gap-1.5 bg-muted/70 px-3 py-1.5 rounded-full text-sm">
+                  <Tag className="w-3.5 h-3.5 text-primary" />
+                  <span className="capitalize">{readable(product.toe_shape)} toe</span>
+                </div>
+              )}
+              {product.country_of_origin && (
+                <div className="flex items-center gap-1.5 bg-muted/70 px-3 py-1.5 rounded-full text-sm">
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                  <span className="capitalize">{readable(product.country_of_origin)}</span>
                 </div>
               )}
               {product.up_material && (
-                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                  <Package className="w-4 h-4 text-primary" />
-                  {product.up_material}
-                </div>
-              )}
-              {product.shape && (
-                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  {product.shape}
-                </div>
-              )}
-              {product.weight != null && (
-                <div className="flex items-center gap-2 bg-muted/60 px-4 py-2 rounded-full text-sm text-foreground">
-                  <Weight className="w-4 h-4 text-primary" />
-                  {product.weight}g
+                <div className="flex items-center gap-1.5 bg-muted/70 px-3 py-1.5 rounded-full text-sm">
+                  <Package className="w-3.5 h-3.5 text-primary" />
+                  <span className="capitalize">{product.up_material}</span>
                 </div>
               )}
             </div>
@@ -217,9 +248,7 @@ export default function ProductDetail({ id }: ProductDetailProps) {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Ruler className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                    Select Size
-                  </span>
+                  <span className="text-sm font-semibold uppercase tracking-wider">Select Size (UK)</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {product.size_ava.map((size) => (
@@ -249,30 +278,20 @@ export default function ProductDetail({ id }: ProductDetailProps) {
               Add to Bag
             </motion.button>
 
-            {/* Specs */}
-            <div className="border-t border-border pt-6 space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
-                Specifications
-              </h3>
-              {[
-                { label: "Type", value: product.type },
-                { label: "Class", value: product.class },
-                { label: "Upper Material", value: product.up_material },
-                { label: "Sole Material", value: product.sole_material },
-                { label: "Shape", value: product.shape },
-                { label: "Color", value: product.color },
-                { label: "Weight", value: product.weight != null ? `${product.weight}g` : null },
-              ]
-                .filter((s) => s.value)
-                .map(({ label, value }) => (
-                  <div key={label} className="flex items-center gap-3 text-sm">
-                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{label}:</span> {value}
-                    </span>
-                  </div>
-                ))}
-            </div>
+            {/* Full Specs */}
+            {specs.length > 0 && (
+              <div className="border-t border-border pt-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Full Specifications</h3>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  {specs.map(({ label, value }) => (
+                    <div key={label}>
+                      <p className="text-xs text-muted-foreground">{label}</p>
+                      <p className="text-sm font-medium text-foreground capitalize">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
@@ -291,9 +310,8 @@ export default function ProductDetail({ id }: ProductDetailProps) {
               <span className="text-xs uppercase tracking-widest text-primary font-semibold">
                 You May Also Like
               </span>
-              <h2 className="mt-2 text-2xl font-bold text-foreground">Related Products</h2>
+              <h2 className="mt-2 text-2xl font-bold">Related Products</h2>
             </motion.div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {related.map((rel, i) => (
                 <ProductCard key={rel.id} product={rel} index={i} />
