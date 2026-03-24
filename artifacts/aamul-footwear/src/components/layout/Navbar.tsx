@@ -6,7 +6,7 @@ import { useBag } from "@/context/BagContext";
 import logoUrl from "/logo.png";
 
 const navLinks = [
-  { href: "/", label: "Products" },
+  { href: "/", label: "Store" },
   { href: "/handmade-mojdi", label: "Handmade Mojdi" },
   { href: "/about", label: "About Us" },
 ];
