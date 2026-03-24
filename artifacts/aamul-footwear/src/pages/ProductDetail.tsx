@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
-  ArrowLeft, ShoppingBag, Loader2, Star,
+  ArrowLeft, ShoppingBag, Check, Loader2, Star,
   Ruler, Package, MapPin, Tag, Heart, Zap
 } from "lucide-react";
 import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
-import { useToast } from "@/hooks/use-toast";
+import { useBag } from "@/context/BagContext";
 import { ProductCard } from "@/components/ui/ProductCard";
 
 interface ProductDetailProps {
@@ -20,7 +20,7 @@ function readable(val?: string) {
 
 export default function ProductDetail({ id }: ProductDetailProps) {
   const [, navigate] = useLocation();
-  const { toast } = useToast();
+  const { addItem, isInBag } = useBag();
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,12 +47,11 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const saved = product ? isInBag(product.id) : false;
+
   const handleAddToCart = () => {
-    if (!selectedSize) {
-      toast({ title: "Please select a size", description: "Choose your size before adding to bag.", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Added to Bag", description: `${product?.title} (Size ${selectedSize}) added to bag.` });
+    if (!product) return;
+    addItem(product);
   };
 
   if (loading) {
@@ -272,10 +271,24 @@ export default function ProductDetail({ id }: ProductDetailProps) {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground font-semibold py-4 rounded-2xl text-base hover:opacity-90 transition-opacity shadow-lg"
+              disabled={saved}
+              className={`w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl text-base transition-all shadow-lg ${
+                saved
+                  ? "bg-primary/20 text-primary cursor-default"
+                  : "bg-primary text-primary-foreground hover:opacity-90"
+              }`}
             >
-              <ShoppingBag className="w-5 h-5" />
-              Add to Bag
+              {saved ? (
+                <>
+                  <Check className="w-5 h-5" />
+                  Saved to Bag
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="w-5 h-5" />
+                  Save to Bag
+                </>
+              )}
             </motion.button>
 
             {/* Full Specs */}

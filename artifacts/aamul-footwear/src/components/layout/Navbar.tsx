@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ShoppingBag, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
+import { useBag } from "@/context/BagContext";
 import logoUrl from "/logo.png";
 
 const navLinks = [
@@ -15,17 +15,13 @@ export default function Navbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { toast } = useToast();
+  const { items, openBag } = useBag();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const handleCartClick = () => {
-    toast({ title: "Cart is empty", description: "Add some beautiful handcrafted shoes first!" });
-  };
 
   return (
     <header
@@ -76,14 +72,28 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            {/* Bag button with badge */}
             <button
-              onClick={handleCartClick}
+              onClick={openBag}
               className="p-2 text-foreground hover:text-primary transition-colors relative group"
-              aria-label="Shopping Cart"
+              aria-label="Saved Bag"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full scale-0 group-hover:scale-100 transition-transform" />
+              <AnimatePresence>
+                {items.length > 0 && (
+                  <motion.span
+                    key="badge"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1 leading-none"
+                  >
+                    {items.length > 99 ? "99+" : items.length}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
+
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 md:hidden text-foreground"

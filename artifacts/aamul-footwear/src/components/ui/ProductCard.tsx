@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { ShoppingBag, Star, ArrowRight } from "lucide-react";
+import { ShoppingBag, Star, ArrowRight, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Product } from "@/lib/products";
-import { useToast } from "@/hooks/use-toast";
+import { useBag } from "@/context/BagContext";
 
 interface ProductCardProps {
   product: Product;
@@ -17,15 +17,13 @@ function badge(text?: string) {
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
-  const { toast } = useToast();
   const [, navigate] = useLocation();
+  const { addItem, isInBag } = useBag();
+  const saved = isInBag(product.id);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast({
-      title: "Added to Bag",
-      description: `${product.title} has been added to your bag.`,
-    });
+    if (!saved) addItem(product);
   };
 
   const mainImage = product.img_url?.[0] ?? "";
@@ -68,14 +66,27 @@ export function ProductCard({ product, index }: ProductCardProps) {
           )}
         </div>
 
-        {/* Hover add-to-bag */}
+        {/* Hover save-to-bag */}
         <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           <button
-            onClick={handleAddToCart}
-            className="w-full bg-background/90 backdrop-blur text-foreground font-medium py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-colors shadow-lg"
+            onClick={handleSave}
+            className={`w-full backdrop-blur font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg ${
+              saved
+                ? "bg-primary text-primary-foreground cursor-default"
+                : "bg-background/90 text-foreground hover:bg-primary hover:text-primary-foreground"
+            }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            Add to Bag
+            {saved ? (
+              <>
+                <Check className="w-4 h-4" />
+                Saved to Bag
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-4 h-4" />
+                Save to Bag
+              </>
+            )}
           </button>
         </div>
       </div>
