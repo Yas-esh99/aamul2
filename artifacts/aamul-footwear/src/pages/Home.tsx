@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Search, X, Loader2 } from "lucide-react";
+import { ArrowRight, Search, X, Loader2, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import { fetchAllProducts, filterProducts, type Product } from "@/lib/products";
 import { ProductCard } from "@/components/ui/ProductCard";
+
+const PAGE_SIZE = 8;
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     fetchAllProducts()
@@ -22,6 +25,13 @@ export default function Home() {
   }, []);
 
   const filtered = query.trim() ? filterProducts(products, query) : products;
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [query]);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = filtered.length > visibleCount;
 
   return (
     <div className="min-h-screen bg-background pt-16">
@@ -127,7 +137,7 @@ export default function Home() {
           </AnimatePresence>
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-4 text-muted-foreground">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -135,7 +145,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error */}
         {!loading && error && (
           <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
             <p className="text-destructive font-medium">{error}</p>
@@ -165,11 +175,35 @@ export default function Home() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
               >
-                {filtered.map((product, idx) => (
-                  <ProductCard key={product.id} product={product} index={idx} />
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                  {visible.map((product, idx) => (
+                    <ProductCard key={product.id} product={product} index={idx} />
+                  ))}
+                </div>
+
+                {/* Show More */}
+                {hasMore && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-col items-center gap-2 mt-14"
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      Showing {visibleCount} of {filtered.length} products
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                      className="flex items-center gap-2 px-8 py-3.5 rounded-full border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                    >
+                      Show More
+                      <ChevronDown className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -233,7 +267,6 @@ export default function Home() {
               <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
                 We believe footwear should mold to your journey, developing a rich patina that tells your unique story.
               </p>
-
               <Link
                 href="/about"
                 className="w-fit border-b-2 border-primary text-foreground font-semibold pb-1 hover:text-primary transition-colors"
