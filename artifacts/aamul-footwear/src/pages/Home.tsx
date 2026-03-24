@@ -24,7 +24,7 @@ export default function Home() {
   const filtered = query.trim() ? filterProducts(products, query) : products;
 
   return (
-    <div className="min-h-screen bg-background pt-20">
+    <div className="min-h-screen bg-background pt-16">
 
       {/* Hero Section */}
       <section className="relative h-[85vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">

@@ -43,10 +43,10 @@ export default function Navbar() {
               className="h-10 w-auto object-contain"
             />
             <div className="hidden sm:block">
-              <p className="font-display text-base font-bold text-foreground leading-tight tracking-wide">
+              <p className="font-display text-xl font-bold text-foreground leading-tight tracking-wide">
                 Aamul Footwear
               </p>
-              <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none">
+              <p className="text-[9px] text-muted-foreground tracking-widest uppercase leading-none">
                 Foot Meets Comfort
               </p>
             </div>
@@ -107,7 +107,7 @@ export default function Navbar() {
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-2">
                 <img src={logoUrl} alt="Aamul Footwear" className="h-9 w-auto" />
-                <span className="font-display text-lg font-bold">Aamul Footwear</span>
+                <span className="font-display text-xl font-bold">Aamul Footwear</span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}

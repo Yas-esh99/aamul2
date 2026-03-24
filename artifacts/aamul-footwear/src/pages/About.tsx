@@ -11,7 +11,7 @@ const BRANDS = ["PU Grip", "Neelam", "Speed"];
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-background pt-20 pb-20">
+    <div className="min-h-screen bg-background pt-16 pb-20">
 
       {/* Hero Banner */}
       <section className="bg-foreground text-background py-20 px-6">
