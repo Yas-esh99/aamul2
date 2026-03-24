@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
   ArrowLeft, ShoppingBag, Check, Loader2, Star,
-  Ruler, Package, MapPin, Tag, Heart, Zap
+  Ruler, Package, MapPin, Tag, Heart, Zap, Navigation
 } from "lucide-react";
 import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
 import { useBag } from "@/context/BagContext";
@@ -290,6 +290,17 @@ export default function ProductDetail({ id }: ProductDetailProps) {
                 </>
               )}
             </motion.button>
+
+            {/* Visit Store */}
+            <a
+              href="https://maps.app.goo.gl/J2E5NxG6Xaa2Acmz9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl text-base border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              <Navigation className="w-5 h-5" />
+              Visit Our Store
+            </a>
 
             {/* Full Specs */}
             {specs.length > 0 && (

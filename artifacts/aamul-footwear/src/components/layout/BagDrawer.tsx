@@ -75,7 +75,7 @@ export default function BagDrawer() {
                     </p>
                   </div>
                   <button
-                    onClick={() => { closeBag(); navigate("/"); }}
+                    onClick={() => { navigate("/"); closeBag(); }}
                     className="mt-2 flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity text-sm"
                   >
                     Explore Products <ArrowRight className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function BagDrawer() {
                   </button>
                 </div>
                 <button
-                  onClick={() => { closeBag(); navigate("/"); }}
+                  onClick={() => { navigate("/"); closeBag(); }}
                   className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-md text-sm"
                 >
                   Continue Shopping <ArrowRight className="w-4 h-4" />
