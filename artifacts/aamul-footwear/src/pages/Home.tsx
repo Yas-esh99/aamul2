@@ -520,44 +520,6 @@ export default function Home() {
         )}
       </section>
 
-      {/* Process Banner */}
-      <section className="bg-muted py-24 px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="order-2 lg:order-1"
-            >
-              <img
-                src={`${import.meta.env.BASE_URL}images/craft-hands.png`}
-                alt="Artisan stitching leather"
-                className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/5] md:aspect-square lg:aspect-[4/5]"
-              />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="order-1 lg:order-2 flex flex-col justify-center"
-            >
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">The Beauty of Slow Craft</h2>
-              <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                In a world of fast fashion, we choose the deliberate pace of human hands. Every cut, every stitch, and every finishing touch is performed by artisans who have inherited their skills through generations.
-              </p>
-              <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-                We believe footwear should mold to your journey, developing a rich patina that tells your unique story.
-              </p>
-              <Link href="/about" className="w-fit border-b-2 border-primary text-foreground font-semibold pb-1 hover:text-primary transition-colors">
-                Read Our Story
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
