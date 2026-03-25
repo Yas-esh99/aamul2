@@ -13,8 +13,7 @@ export default function BagDrawer() {
   };
 
   const handleContinueShopping = () => {
-    navigate("/");
-    setTimeout(() => closeBag(), 50);
+    closeBag();
   };
 
   return (
