@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
-  ArrowLeft, ShoppingBag, Check, Loader2, Star,
+  ShoppingBag, Check, Loader2, Star,
   Ruler, Package, MapPin, Tag, Heart, Zap, Navigation, Share2
 } from "lucide-react";
 import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
@@ -126,41 +126,8 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       transition={{ duration: 0.4 }}
       className="min-h-screen bg-background"
     >
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-6 pt-24 pb-2 flex items-center justify-between">
-        <button
-          onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Products
-        </button>
-
-        <motion.button
-          onClick={handleShare}
-          whileTap={{ scale: 0.93 }}
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-            shareState === "copied"
-              ? "bg-green-500/10 border-green-500/40 text-green-600"
-              : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-          }`}
-        >
-          {shareState === "copied" ? (
-            <>
-              <Check className="w-4 h-4" />
-              Link Copied!
-            </>
-          ) : (
-            <>
-              <Share2 className="w-4 h-4" />
-              Share
-            </>
-          )}
-        </motion.button>
-      </div>
-
       {/* Main */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
 
           {/* Gallery */}
@@ -168,8 +135,31 @@ export default function ProductDetail({ id }: ProductDetailProps) {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-4"
+            className="space-y-4 relative"
           >
+            {/* Share button — top-right of image */}
+            <motion.button
+              onClick={handleShare}
+              whileTap={{ scale: 0.93 }}
+              className={`absolute top-3 right-3 z-10 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-medium shadow-md backdrop-blur-sm transition-all ${
+                shareState === "copied"
+                  ? "bg-green-500/90 border-green-500 text-white"
+                  : "bg-background/80 border-border text-foreground hover:bg-background hover:border-primary/40"
+              }`}
+            >
+              {shareState === "copied" ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </>
+              )}
+            </motion.button>
+
             <div className="relative aspect-square rounded-3xl overflow-hidden bg-muted">
               {images.length > 0 ? (
                 <img
