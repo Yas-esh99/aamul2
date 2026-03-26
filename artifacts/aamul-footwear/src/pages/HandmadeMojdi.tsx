@@ -252,8 +252,8 @@ export default function HandmadeMojdi() {
               </p>
               <div className="space-y-4">
                 {[
-                  { icon: Phone, label: "Call / WhatsApp", value: "+91 98765 43210" },
-                  { icon: Mail, label: "Email Us", value: "hello@aamulfootwear.com" },
+                  { icon: Phone, label: "Call / WhatsApp", value: "9879098493" },
+                  { icon: Mail, label: "Email Us", value: "aamulfootwear@gmail.com" },
                   { icon: MessageSquare, label: "Response Time", value: "Within 24 hours" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-4">
@@ -306,7 +306,7 @@ export default function HandmadeMojdi() {
                         required
                         value={form.name}
                         onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                        placeholder="Ahmed Khan"
+                        placeholder="Rahul Parmar"
                         className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#c2613a]/30 focus:border-[#c2613a] transition-all"
                       />
                     </div>
@@ -318,7 +318,7 @@ export default function HandmadeMojdi() {
                         required
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        placeholder="+91 98765 43210"
+                        placeholder="9879098493"
                         className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#c2613a]/30 focus:border-[#c2613a] transition-all"
                       />
                     </div>
