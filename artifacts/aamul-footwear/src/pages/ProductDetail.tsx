@@ -127,7 +127,7 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       className="min-h-screen bg-background"
     >
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-6 pt-8 pb-2 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group"
