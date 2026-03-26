@@ -8,26 +8,38 @@ import { ProductCard } from "@/components/ui/ProductCard";
 const PAGE_SIZE = 8;
 
 const QUICK_TAGS = [
-  { label: "All", key: "all" },
+  { label: "All", key: "all", field: null, value: null },
   { label: "Handmade", key: "handmade", field: "madeWith", value: "handmade" },
-  { label: "Men", key: "men", field: "idealFor", value: "men" },
-  { label: "Women", key: "women", field: "idealFor", value: "women" },
-  { label: "Loafer", key: "loafer", field: "category", value: "loafer" },
-  { label: "Leather", key: "leather", field: "upMaterial", value: "leather" },
+  { label: "Men", key: "man", field: "idealFor", value: "man" },
+  { label: "Women", key: "woman", field: "idealFor", value: "woman" },
+  { label: "Kids", key: "kid", field: "idealFor", value: "kid" },
+  { label: "Loafer", key: "lofar", field: "category", value: "lofar" },
+  { label: "Leather", key: "leather", field: "upMaterials", value: "leather" },
   { label: "Traditional", key: "traditional", field: "category", value: "traditional" },
-  { label: "Sandals", key: "sandals", field: "category", value: "sandals" },
-  { label: "Casual", key: "casual", field: "category", value: "casual" },
-  { label: "Sports", key: "sports", field: "category", value: "sports" },
-  { label: "Boots", key: "boots", field: "category", value: "boots" },
-  { label: "Heels", key: "heels", field: "category", value: "heels" },
-  { label: "Formal", key: "formal", field: "category", value: "formal" },
+  { label: "Sandal", key: "sandal", field: "category", value: "sandal" },
+  { label: "Boot", key: "boot", field: "category", value: "boot" },
+  { label: "Wedding", key: "wedding", field: "occasions", value: "wedding" },
+  { label: "Formal", key: "formal", field: "occasions", value: "formal" },
 ];
 
-const CATEGORIES = [
-  "Formal", "Casual", "Sports", "Boots", "Sandals", "Traditional", "Heels", "Slippers",
+const CATEGORIES: { label: string; value: string }[] = [
+  { label: "Loafer", value: "lofar" },
+  { label: "Sandal", value: "sandal" },
+  { label: "Boot", value: "boot" },
+  { label: "Shoe", value: "shoe" },
+  { label: "Slipper", value: "slipper" },
+  { label: "Traditional", value: "traditional" },
+  { label: "Casual", value: "casual" },
+  { label: "Formal", value: "formal" },
+  { label: "Sports", value: "sports" },
 ];
 
-const IDEAL_FOR_OPTIONS = ["Men", "Women", "Kids", "Unisex"];
+const IDEAL_FOR_OPTIONS: { label: string; value: string }[] = [
+  { label: "Men", value: "man" },
+  { label: "Women", value: "woman" },
+  { label: "Kids", value: "kid" },
+  { label: "Unisex", value: "unisex" },
+];
 
 const PRICE_RANGES = [
   { label: "Any price", min: null, max: null },
@@ -37,40 +49,85 @@ const PRICE_RANGES = [
   { label: "₹2,500+", min: 2500, max: null },
 ];
 
-const OCCASIONS = ["Casual", "Formal", "Wedding", "Festival", "Party", "Sports", "Ethnic"];
+const OCCASIONS: { label: string; value: string }[] = [
+  { label: "Wedding", value: "wedding" },
+  { label: "Casual", value: "casual" },
+  { label: "Formal", value: "formal" },
+  { label: "Festival", value: "festival" },
+  { label: "Party", value: "party" },
+  { label: "Sports", value: "sports" },
+  { label: "Ethnic", value: "ethnic" },
+];
 
-const MATERIALS = ["Leather", "Canvas", "Synthetic", "Fabric", "Rubber", "Suede", "Jute"];
+const MATERIALS: { label: string; value: string }[] = [
+  { label: "Leather", value: "leather" },
+  { label: "Canvas", value: "canvas" },
+  { label: "Synthetic", value: "synthetic" },
+  { label: "Fabric", value: "fabric" },
+  { label: "Rubber", value: "rubber" },
+  { label: "Suede", value: "suede" },
+  { label: "Jute", value: "jute" },
+];
 
-const MADE_WITH_OPTIONS = ["Handmade", "Machine Made", "Hand Stitched", "Hand Embroidered"];
+const MADE_WITH_OPTIONS: { label: string; value: string }[] = [
+  { label: "Handmade", value: "handmade" },
+  { label: "Machine Made", value: "machine made" },
+  { label: "Hand Stitched", value: "hand stitched" },
+  { label: "Hand Embroidered", value: "hand embroidered" },
+];
+
+const COLORS: { label: string; value: string }[] = [
+  { label: "Tan", value: "tan" },
+  { label: "Black", value: "black" },
+  { label: "Brown", value: "brown" },
+  { label: "White", value: "white" },
+  { label: "Beige", value: "beige" },
+  { label: "Red", value: "red" },
+  { label: "Blue", value: "blue" },
+  { label: "Green", value: "green" },
+];
 
 interface Filters {
-  category: string;
-  idealFor: string;
+  categories: string[];
+  idealFor: string[];
   priceIdx: number;
-  occasion: string;
-  upMaterial: string;
-  madeWith: string;
+  occasions: string[];
+  upMaterials: string[];
+  madeWith: string[];
+  colors: string[];
 }
 
 const DEFAULT_FILTERS: Filters = {
-  category: "",
-  idealFor: "",
+  categories: [],
+  idealFor: [],
   priceIdx: 0,
-  occasion: "",
-  upMaterial: "",
-  madeWith: "",
+  occasions: [],
+  upMaterials: [],
+  madeWith: [],
+  colors: [],
 };
+
+function toggleInArray(arr: string[], value: string): string[] {
+  return arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
+}
 
 function applyFilters(products: Product[], filters: Filters, query: string): Product[] {
   let result = query.trim() ? filterProducts(products, query) : products;
-  const { category, idealFor, priceIdx, occasion, upMaterial, madeWith } = filters;
+  const { categories, idealFor, priceIdx, occasions, upMaterials, madeWith, colors } = filters;
   const price = PRICE_RANGES[priceIdx];
 
-  if (category) result = result.filter((p) => p.category?.toLowerCase() === category.toLowerCase());
-  if (idealFor) result = result.filter((p) => p.ideal_for?.toLowerCase() === idealFor.toLowerCase());
-  if (occasion) result = result.filter((p) => p.occasion?.toLowerCase().includes(occasion.toLowerCase()));
-  if (upMaterial) result = result.filter((p) => p.up_material?.toLowerCase().includes(upMaterial.toLowerCase()));
-  if (madeWith) result = result.filter((p) => p.made_with?.toLowerCase().includes(madeWith.toLowerCase()));
+  if (categories.length > 0)
+    result = result.filter((p) => p.category && categories.includes(p.category.toLowerCase()));
+  if (idealFor.length > 0)
+    result = result.filter((p) => p.ideal_for && idealFor.includes(p.ideal_for.toLowerCase()));
+  if (occasions.length > 0)
+    result = result.filter((p) => p.occasion && occasions.some((o) => p.occasion!.toLowerCase().includes(o)));
+  if (upMaterials.length > 0)
+    result = result.filter((p) => p.up_material && upMaterials.some((m) => p.up_material!.toLowerCase().includes(m)));
+  if (madeWith.length > 0)
+    result = result.filter((p) => p.made_with && madeWith.some((mw) => p.made_with!.toLowerCase().includes(mw)));
+  if (colors.length > 0)
+    result = result.filter((p) => p.color && colors.includes(p.color.toLowerCase()));
   if (price.min != null) result = result.filter((p) => p.price != null && p.price >= price.min!);
   if (price.max != null) result = result.filter((p) => p.price != null && p.price <= price.max!);
 
@@ -78,14 +135,19 @@ function applyFilters(products: Product[], filters: Filters, query: string): Pro
 }
 
 function countActiveFilters(filters: Filters): number {
-  let count = 0;
-  if (filters.category) count++;
-  if (filters.idealFor) count++;
-  if (filters.priceIdx > 0) count++;
-  if (filters.occasion) count++;
-  if (filters.upMaterial) count++;
-  if (filters.madeWith) count++;
-  return count;
+  return (
+    filters.categories.length +
+    filters.idealFor.length +
+    (filters.priceIdx > 0 ? 1 : 0) +
+    filters.occasions.length +
+    filters.upMaterials.length +
+    filters.madeWith.length +
+    filters.colors.length
+  );
+}
+
+function filtersEqual(a: Filters, b: Filters): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 export default function Home() {
@@ -96,7 +158,6 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeTag, setActiveTag] = useState("all");
 
   useEffect(() => {
     fetchAllProducts()
@@ -119,29 +180,54 @@ export default function Home() {
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
   const activeFilterCount = countActiveFilters(filters);
+  const isDefault = filtersEqual(filters, DEFAULT_FILTERS) && !query.trim();
 
-  const setFilter = <K extends keyof Filters>(key: K, value: Filters[K]) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const toggleFilter = <K extends keyof Omit<Filters, "priceIdx">>(key: K, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: toggleInArray(prev[key] as string[], value),
+    }));
   };
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
-    setActiveTag("all");
     setQuery("");
   };
 
   const handleTagClick = (tag: typeof QUICK_TAGS[number]) => {
-    setActiveTag(tag.key);
     if (tag.key === "all") {
-      setFilters(DEFAULT_FILTERS);
+      resetFilters();
       return;
     }
-    const newFilters = { ...DEFAULT_FILTERS };
-    if (tag.field === "category") newFilters.category = tag.value ?? "";
-    else if (tag.field === "idealFor") newFilters.idealFor = tag.value ?? "";
-    else if (tag.field === "upMaterial") newFilters.upMaterial = tag.value ?? "";
-    else if (tag.field === "madeWith") newFilters.madeWith = tag.value ?? "";
-    setFilters(newFilters);
+    if (!tag.field || !tag.value) return;
+
+    const fieldMap: Record<string, keyof Omit<Filters, "priceIdx">> = {
+      category: "categories",
+      idealFor: "idealFor",
+      occasions: "occasions",
+      upMaterials: "upMaterials",
+      madeWith: "madeWith",
+      colors: "colors",
+    };
+    const filterKey = fieldMap[tag.field];
+    if (!filterKey) return;
+    toggleFilter(filterKey, tag.value);
+  };
+
+  const isTagActive = (tag: typeof QUICK_TAGS[number]): boolean => {
+    if (tag.key === "all") return isDefault;
+    if (!tag.field || !tag.value) return false;
+    const fieldMap: Record<string, keyof Omit<Filters, "priceIdx">> = {
+      category: "categories",
+      idealFor: "idealFor",
+      occasions: "occasions",
+      upMaterials: "upMaterials",
+      madeWith: "madeWith",
+      colors: "colors",
+    };
+    const filterKey = fieldMap[tag.field];
+    if (!filterKey) return false;
+    return (filters[filterKey] as string[]).includes(tag.value);
   };
 
   return (
@@ -233,21 +319,24 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Quick tags */}
+        {/* Quick tags — multi-select */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
-          {QUICK_TAGS.map((tag) => (
-            <button
-              key={tag.key}
-              onClick={() => handleTagClick(tag)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                activeTag === tag.key
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-              }`}
-            >
-              {tag.label}
-            </button>
-          ))}
+          {QUICK_TAGS.map((tag) => {
+            const active = isTagActive(tag);
+            return (
+              <button
+                key={tag.key}
+                onClick={() => handleTagClick(tag)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                }`}
+              >
+                {tag.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Advanced filter panel */}
@@ -261,7 +350,7 @@ export default function Home() {
               className="overflow-hidden"
             >
               <div className="bg-muted/50 border border-border rounded-2xl p-5 mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
 
                   {/* Category */}
                   <div>
@@ -269,41 +358,35 @@ export default function Home() {
                     <div className="flex flex-wrap gap-1.5">
                       {CATEGORIES.map((c) => (
                         <button
-                          key={c}
-                          onClick={() => {
-                            setFilter("category", filters.category === c.toLowerCase() ? "" : c.toLowerCase());
-                            setActiveTag("all");
-                          }}
+                          key={c.value}
+                          onClick={() => { toggleFilter("categories", c.value); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.category === c.toLowerCase()
+                            filters.categories.includes(c.value)
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background border-border text-foreground hover:border-primary/40"
                           }`}
                         >
-                          {c}
+                          {c.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Gender / For */}
+                  {/* Ideal For */}
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ideal For</label>
                     <div className="flex flex-wrap gap-1.5">
                       {IDEAL_FOR_OPTIONS.map((opt) => (
                         <button
-                          key={opt}
-                          onClick={() => {
-                            setFilter("idealFor", filters.idealFor === opt.toLowerCase() ? "" : opt.toLowerCase());
-                            setActiveTag("all");
-                          }}
+                          key={opt.value}
+                          onClick={() => { toggleFilter("idealFor", opt.value); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.idealFor === opt.toLowerCase()
+                            filters.idealFor.includes(opt.value)
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background border-border text-foreground hover:border-primary/40"
                           }`}
                         >
-                          {opt}
+                          {opt.label}
                         </button>
                       ))}
                     </div>
@@ -316,7 +399,7 @@ export default function Home() {
                       {PRICE_RANGES.map((range, idx) => (
                         <button
                           key={idx}
-                          onClick={() => { setFilter("priceIdx", idx); setActiveTag("all"); }}
+                          onClick={() => setFilters((prev) => ({ ...prev, priceIdx: idx }))}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border text-left transition-all ${
                             filters.priceIdx === idx
                               ? "bg-primary text-primary-foreground border-primary"
@@ -335,18 +418,15 @@ export default function Home() {
                     <div className="flex flex-wrap gap-1.5">
                       {OCCASIONS.map((occ) => (
                         <button
-                          key={occ}
-                          onClick={() => {
-                            setFilter("occasion", filters.occasion === occ.toLowerCase() ? "" : occ.toLowerCase());
-                            setActiveTag("all");
-                          }}
+                          key={occ.value}
+                          onClick={() => { toggleFilter("occasions", occ.value); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.occasion === occ.toLowerCase()
+                            filters.occasions.includes(occ.value)
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background border-border text-foreground hover:border-primary/40"
                           }`}
                         >
-                          {occ}
+                          {occ.label}
                         </button>
                       ))}
                     </div>
@@ -358,18 +438,15 @@ export default function Home() {
                     <div className="flex flex-wrap gap-1.5">
                       {MATERIALS.map((mat) => (
                         <button
-                          key={mat}
-                          onClick={() => {
-                            setFilter("upMaterial", filters.upMaterial === mat.toLowerCase() ? "" : mat.toLowerCase());
-                            setActiveTag("all");
-                          }}
+                          key={mat.value}
+                          onClick={() => { toggleFilter("upMaterials", mat.value); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.upMaterial === mat.toLowerCase()
+                            filters.upMaterials.includes(mat.value)
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background border-border text-foreground hover:border-primary/40"
                           }`}
                         >
-                          {mat}
+                          {mat.label}
                         </button>
                       ))}
                     </div>
@@ -381,18 +458,35 @@ export default function Home() {
                     <div className="flex flex-wrap gap-1.5">
                       {MADE_WITH_OPTIONS.map((opt) => (
                         <button
-                          key={opt}
-                          onClick={() => {
-                            setFilter("madeWith", filters.madeWith === opt.toLowerCase() ? "" : opt.toLowerCase());
-                            setActiveTag("all");
-                          }}
+                          key={opt.value}
+                          onClick={() => { toggleFilter("madeWith", opt.value); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.madeWith === opt.toLowerCase()
+                            filters.madeWith.includes(opt.value)
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background border-border text-foreground hover:border-primary/40"
                           }`}
                         >
-                          {opt}
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Color */}
+                  <div>
+                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Color</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {COLORS.map((col) => (
+                        <button
+                          key={col.value}
+                          onClick={() => { toggleFilter("colors", col.value); }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                            filters.colors.includes(col.value)
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background border-border text-foreground hover:border-primary/40"
+                          }`}
+                        >
+                          {col.label}
                         </button>
                       ))}
                     </div>
