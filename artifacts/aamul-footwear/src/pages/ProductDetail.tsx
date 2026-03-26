@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
   ArrowLeft, ShoppingBag, Check, Loader2, Star,
-  Ruler, Package, MapPin, Tag, Heart, Zap, Navigation
+  Ruler, Package, MapPin, Tag, Heart, Zap, Navigation, Share2
 } from "lucide-react";
 import { fetchProductById, fetchProductsByCategory, type Product } from "@/lib/products";
 import { useBag } from "@/context/BagContext";
@@ -27,6 +27,28 @@ export default function ProductDetail({ id }: ProductDetailProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | number | null>(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [shareState, setShareState] = useState<"idle" | "copied">("idle");
+
+  const handleShare = async () => {
+    if (!product) return;
+    const url = window.location.href;
+    const shareData = {
+      title: product.title,
+      text: product.description,
+      url,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (_) {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareState("copied");
+        setTimeout(() => setShareState("idle"), 2000);
+      } catch (_) {}
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -105,7 +127,7 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       className="min-h-screen bg-background"
     >
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-6 pt-8 pb-2">
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group"
@@ -113,6 +135,28 @@ export default function ProductDetail({ id }: ProductDetailProps) {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Products
         </button>
+
+        <motion.button
+          onClick={handleShare}
+          whileTap={{ scale: 0.93 }}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+            shareState === "copied"
+              ? "bg-green-500/10 border-green-500/40 text-green-600"
+              : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+          }`}
+        >
+          {shareState === "copied" ? (
+            <>
+              <Check className="w-4 h-4" />
+              Link Copied!
+            </>
+          ) : (
+            <>
+              <Share2 className="w-4 h-4" />
+              Share
+            </>
+          )}
+        </motion.button>
       </div>
 
       {/* Main */}
