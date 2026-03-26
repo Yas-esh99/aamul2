@@ -127,7 +127,7 @@ export default function ProductDetail({ id }: ProductDetailProps) {
       className="min-h-screen bg-background"
     >
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-6 pt-16 pb-2">
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group"
@@ -135,6 +135,28 @@ export default function ProductDetail({ id }: ProductDetailProps) {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Products
         </button>
+
+        <motion.button
+          onClick={handleShare}
+          whileTap={{ scale: 0.93 }}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+            shareState === "copied"
+              ? "bg-green-500/10 border-green-500/40 text-green-600"
+              : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+          }`}
+        >
+          {shareState === "copied" ? (
+            <>
+              <Check className="w-4 h-4" />
+              Link Copied!
+            </>
+          ) : (
+            <>
+              <Share2 className="w-4 h-4" />
+              Share
+            </>
+          )}
+        </motion.button>
       </div>
 
       {/* Main */}
@@ -323,29 +345,6 @@ export default function ProductDetail({ id }: ProductDetailProps) {
               <Navigation className="w-5 h-5" />
               Visit Our Store
             </a>
-
-            {/* Share */}
-            <motion.button
-              onClick={handleShare}
-              whileTap={{ scale: 0.97 }}
-              className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-medium border transition-all ${
-                shareState === "copied"
-                  ? "bg-green-500/10 border-green-500/40 text-green-600"
-                  : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-              }`}
-            >
-              {shareState === "copied" ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  Link Copied!
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4" />
-                  Share this Product
-                </>
-              )}
-            </motion.button>
 
             {/* Full Specs */}
             {specs.length > 0 && (
