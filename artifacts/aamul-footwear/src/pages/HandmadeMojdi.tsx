@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Send, Loader2, CheckCircle, Phone, Mail, MessageSquare, ImagePlus, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Loader2, CheckCircle, Phone, Mail, MessageSquare, ImagePlus, ChevronDown, X } from "lucide-react";
 import { fetchMojdiGallery, type MojdiDoc } from "@/lib/products";
 
 const PROCESS_STEPS = [
@@ -48,6 +48,15 @@ export default function HandmadeMojdi() {
   const [extraVisible, setExtraVisible] = useState(EXTRA_PAGE_SIZE);
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
+  const closeLightbox = useCallback(() => setLightboxImage(null), []);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeLightbox(); };
+    if (lightboxImage) window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [lightboxImage, closeLightbox]);
 
   useEffect(() => {
     fetchMojdiGallery()
@@ -203,6 +212,7 @@ export default function HandmadeMojdi() {
                   viewport={{ once: true, margin: "-30px" }}
                   transition={{ duration: 0.4, delay: (i % 4) * 0.06 }}
                   className="break-inside-avoid rounded-2xl overflow-hidden group cursor-pointer"
+                  onClick={() => setLightboxImage(url)}
                 >
                   <div className="relative overflow-hidden">
                     <img
@@ -395,6 +405,7 @@ export default function HandmadeMojdi() {
                   viewport={{ once: true, margin: "-30px" }}
                   transition={{ duration: 0.4, delay: (i % 4) * 0.06 }}
                   className="break-inside-avoid rounded-2xl overflow-hidden group cursor-pointer"
+                  onClick={() => setLightboxImage(url)}
                 >
                   <div className="relative overflow-hidden">
                     <img
@@ -432,6 +443,42 @@ export default function HandmadeMojdi() {
           </div>
         </section>
       )}
+
+      {/* ─── LIGHTBOX ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div
+            key="lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            onClick={closeLightbox}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Image */}
+            <motion.img
+              src={lightboxImage}
+              alt="Mojdi full view"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
