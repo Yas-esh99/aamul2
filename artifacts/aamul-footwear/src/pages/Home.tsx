@@ -217,7 +217,7 @@ export default function Home() {
       ...STATIC_QUICK_TAGS,
       ...categoriesData.map((c) => ({
         label: getCategoryLabel(c),
-        key: c.value ?? c.id,
+        key: `cat-${c.value ?? c.id}`,
         field: "category",
         value: c.value ?? c.id,
       })),

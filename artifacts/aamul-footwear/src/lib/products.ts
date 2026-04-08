@@ -99,17 +99,21 @@ export async function fetchMojdiGallery(): Promise<MojdiDoc[]> {
 }
 
 export async function fetchCategories(): Promise<CategoryDoc[]> {
-  // Try "category" first, fall back to "categories"
-  let snap = await getDocs(collection(db, "category"));
-  if (snap.empty) {
-    snap = await getDocs(collection(db, "categories"));
-  }
-  console.log("[fetchCategories] docs count:", snap.size);
-  snap.docs.forEach((d) => {
-    console.log("[fetchCategories] doc id:", d.id, "data:", JSON.stringify(d.data()));
-  });
-  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as CategoryDoc));
-  return docs.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+  const snap = await getDocs(collection(db, "categoery"));
+  if (snap.empty) return [];
+
+  // The collection has one document where each key is a category name
+  // and the value is a string[] of subcategory names.
+  const data = snap.docs[0].data() as Record<string, string[]>;
+
+  return Object.entries(data)
+    .map(([key, subs]) => ({
+      id: key.toLowerCase(),
+      label: key,
+      value: key.toLowerCase(),
+      subcategories: Array.isArray(subs) ? subs : [],
+    }))
+    .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""));
 }
 
 /** Normalise a CategoryDoc's subcategories to always be SubCategory[]. */
