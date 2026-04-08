@@ -2,6 +2,10 @@ import { Link } from "wouter";
 import { Facebook, Instagram, Mail, Phone, MapPin, Linkedin } from "lucide-react";
 import logoUrl from "/logo.png";
 
+function dispatchNavigate() {
+  window.dispatchEvent(new CustomEvent("aamul:navigate"));
+}
+
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -112,12 +116,19 @@ export default function Footer() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-5">
               {CATEGORIES.map((cat) => (
                 <div key={cat.name}>
-                  <p className="text-background text-sm font-semibold mb-1.5">{cat.name}</p>
+                  <Link
+                    href={`/?category=${encodeURIComponent(cat.name.toLowerCase())}`}
+                    onClick={dispatchNavigate}
+                    className="text-background text-sm font-semibold mb-1.5 block hover:text-primary transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
                   <ul className="space-y-1">
                     {cat.items.map((item) => (
                       <li key={item}>
                         <Link
-                          href={`/?category=${encodeURIComponent(item.toLowerCase())}`}
+                          href={`/?category=${encodeURIComponent(cat.name.toLowerCase())}&sub=${encodeURIComponent(item.toLowerCase())}`}
+                          onClick={dispatchNavigate}
                           className="text-background/50 hover:text-background/90 text-xs transition-colors"
                         >
                           {item}

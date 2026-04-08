@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Search, X, Loader2, ChevronDown, SlidersHorizontal, ChevronUp } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   fetchAllProducts,
   fetchCategories,
@@ -163,6 +163,7 @@ function filtersEqual(a: Filters, b: Filters): boolean {
 }
 
 export default function Home() {
+  const [location] = useLocation();
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -191,6 +192,26 @@ export default function Home() {
         setCategoriesLoading(false);
       });
   }, []);
+
+  // Apply ?category= and ?sub= URL params as filters when navigating from footer
+  useEffect(() => {
+    const apply = () => {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get("category");
+      const sub = params.get("sub");
+      if (cat) {
+        setFilters({ ...DEFAULT_FILTERS, categories: [cat] });
+        setQuery(sub ?? "");
+        setTimeout(() => {
+          document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" });
+        }, 150);
+      }
+    };
+
+    apply(); // handles cross-page navigation (location changed)
+    window.addEventListener("aamul:navigate", apply); // handles same-page footer clicks
+    return () => window.removeEventListener("aamul:navigate", apply);
+  }, [location]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
