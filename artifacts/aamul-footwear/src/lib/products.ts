@@ -45,11 +45,17 @@ export interface SubCategory {
 }
 
 export interface CategoryDoc {
-  id: string;             // doc ID, used as filter value if `value` not set
-  label: string;          // display name
-  value?: string;         // optional explicit filter value (falls back to id)
-  order?: number;         // optional sort order
+  id: string;                    // doc ID, used as filter value if `value` not set
+  label?: string;                // display name (label or name field)
+  name?: string;                 // alternate display name field
+  value?: string;                // optional explicit filter value (falls back to id)
+  order?: number;                // optional sort order
   subcategories?: SubCategory[] | string[];
+}
+
+/** Returns the best display label for a CategoryDoc. */
+export function getCategoryLabel(cat: CategoryDoc): string {
+  return cat.label || cat.name || cat.id;
 }
 
 const COLLECTION = "products";

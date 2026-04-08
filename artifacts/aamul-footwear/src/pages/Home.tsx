@@ -7,6 +7,7 @@ import {
   fetchCategories,
   filterProducts,
   normaliseSubcategories,
+  getCategoryLabel,
   type Product,
   type CategoryDoc,
 } from "@/lib/products";
@@ -104,13 +105,31 @@ function toggleInArray(arr: string[], value: string): string[] {
   return arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
 }
 
-function applyFilters(products: Product[], filters: Filters, query: string): Product[] {
+function applyFilters(
+  products: Product[],
+  filters: Filters,
+  query: string,
+  categoriesData: CategoryDoc[]
+): Product[] {
   let result = query.trim() ? filterProducts(products, query) : products;
   const { categories, idealFor, priceIdx, occasions, upMaterials, madeWith, colors } = filters;
   const price = PRICE_RANGES[priceIdx];
 
-  if (categories.length > 0)
-    result = result.filter((p) => p.category && categories.includes(p.category.toLowerCase()));
+  if (categories.length > 0) {
+    // Expand each selected main category to also include its subcategory values
+    const validValues = new Set<string>(categories.map((c) => c.toLowerCase()));
+    for (const catValue of categories) {
+      const catDoc = categoriesData.find(
+        (c) => (c.value ?? c.id).toLowerCase() === catValue.toLowerCase()
+      );
+      if (catDoc) {
+        for (const sub of normaliseSubcategories(catDoc)) {
+          validValues.add(sub.value.toLowerCase());
+        }
+      }
+    }
+    result = result.filter((p) => p.category && validValues.has(p.category.toLowerCase()));
+  }
   if (idealFor.length > 0)
     result = result.filter((p) => p.ideal_for && idealFor.includes(p.ideal_for.toLowerCase()));
   if (occasions.length > 0)
@@ -178,8 +197,8 @@ export default function Home() {
   }, [query, filters]);
 
   const filtered = useMemo(
-    () => applyFilters(products, filters, query),
-    [products, filters, query]
+    () => applyFilters(products, filters, query, categoriesData),
+    [products, filters, query, categoriesData]
   );
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
@@ -188,7 +207,7 @@ export default function Home() {
 
   // Normalised list of { label, value } for the filter panel
   const dynamicCategories = useMemo(
-    () => categoriesData.map((c) => ({ label: c.label, value: c.value ?? c.id })),
+    () => categoriesData.map((c) => ({ label: getCategoryLabel(c), value: c.value ?? c.id })),
     [categoriesData]
   );
 
@@ -197,7 +216,7 @@ export default function Home() {
     () => [
       ...STATIC_QUICK_TAGS,
       ...categoriesData.map((c) => ({
-        label: c.label,
+        label: getCategoryLabel(c),
         key: c.value ?? c.id,
         field: "category",
         value: c.value ?? c.id,
@@ -205,24 +224,6 @@ export default function Home() {
     ],
     [categoriesData]
   );
-
-  // Subcategories visible when a parent category is selected
-  const visibleSubcategories = useMemo(() => {
-    const subs: Array<{ label: string; value: string }> = [];
-    const seen = new Set<string>();
-    for (const cat of categoriesData) {
-      const catValue = cat.value ?? cat.id;
-      if (filters.categories.includes(catValue)) {
-        for (const sub of normaliseSubcategories(cat)) {
-          if (!seen.has(sub.value)) {
-            subs.push(sub);
-            seen.add(sub.value);
-          }
-        }
-      }
-    }
-    return subs;
-  }, [categoriesData, filters.categories]);
 
   const toggleFilter = <K extends keyof Omit<Filters, "priceIdx">>(key: K, value: string) => {
     setFilters((prev) => ({
@@ -404,44 +405,20 @@ export default function Home() {
                         ))}
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        {/* Main category chips — consistent wrap layout */}
-                        <div className="flex flex-wrap gap-1.5">
-                          {dynamicCategories.map((c) => (
-                            <button
-                              key={c.value}
-                              onClick={() => toggleFilter("categories", c.value)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                                filters.categories.includes(c.value)
-                                  ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-background border-border text-foreground hover:border-primary/40"
-                              }`}
-                            >
-                              {c.label}
-                            </button>
-                          ))}
-                        </div>
-                        {/* Subcategories — shown when a parent category is selected */}
-                        {visibleSubcategories.length > 0 && (
-                          <div className="pl-2 border-l-2 border-primary/20 space-y-1.5 pt-0.5">
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Subcategory</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {visibleSubcategories.map((sub) => (
-                                <button
-                                  key={sub.value}
-                                  onClick={() => toggleFilter("categories", sub.value)}
-                                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
-                                    filters.categories.includes(sub.value)
-                                      ? "bg-primary/80 text-primary-foreground border-primary/80"
-                                      : "bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                                  }`}
-                                >
-                                  {sub.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {dynamicCategories.map((c) => (
+                          <button
+                            key={c.value}
+                            onClick={() => toggleFilter("categories", c.value)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                              filters.categories.includes(c.value)
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background border-border text-foreground hover:border-primary/40"
+                            }`}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
