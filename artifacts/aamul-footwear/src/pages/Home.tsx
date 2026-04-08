@@ -2,36 +2,29 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Search, X, Loader2, ChevronDown, SlidersHorizontal, ChevronUp } from "lucide-react";
 import { Link } from "wouter";
-import { fetchAllProducts, filterProducts, type Product } from "@/lib/products";
+import {
+  fetchAllProducts,
+  fetchCategories,
+  filterProducts,
+  normaliseSubcategories,
+  type Product,
+  type CategoryDoc,
+} from "@/lib/products";
 import { ProductCard } from "@/components/ui/ProductCard";
 
 const PAGE_SIZE = 8;
 
-const QUICK_TAGS = [
+type QuickTag = { label: string; key: string; field: string | null; value: string | null };
+
+const STATIC_QUICK_TAGS: QuickTag[] = [
   { label: "All", key: "all", field: null, value: null },
   { label: "Handmade", key: "handmade", field: "madeWith", value: "handmade" },
   { label: "Men", key: "man", field: "idealFor", value: "man" },
   { label: "Women", key: "woman", field: "idealFor", value: "woman" },
   { label: "Kids", key: "kid", field: "idealFor", value: "kid" },
-  { label: "Loafer", key: "lofar", field: "category", value: "lofar" },
   { label: "Leather", key: "leather", field: "upMaterials", value: "leather" },
-  { label: "Traditional", key: "traditional", field: "category", value: "traditional" },
-  { label: "Sandal", key: "sandal", field: "category", value: "sandal" },
-  { label: "Boot", key: "boot", field: "category", value: "boot" },
   { label: "Wedding", key: "wedding", field: "occasions", value: "wedding" },
   { label: "Formal", key: "formal", field: "occasions", value: "formal" },
-];
-
-const CATEGORIES: { label: string; value: string }[] = [
-  { label: "Loafer", value: "lofar" },
-  { label: "Sandal", value: "sandal" },
-  { label: "Boot", value: "boot" },
-  { label: "Shoe", value: "shoe" },
-  { label: "Slipper", value: "slipper" },
-  { label: "Traditional", value: "traditional" },
-  { label: "Casual", value: "casual" },
-  { label: "Formal", value: "formal" },
-  { label: "Sports", value: "sports" },
 ];
 
 const IDEAL_FOR_OPTIONS: { label: string; value: string }[] = [
@@ -158,15 +151,26 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [categoriesData, setCategoriesData] = useState<CategoryDoc[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
-    fetchAllProducts()
-      .then(setProducts)
+    Promise.all([
+      fetchAllProducts(),
+      fetchCategories(),
+    ])
+      .then(([prods, cats]) => {
+        setProducts(prods);
+        setCategoriesData(cats);
+      })
       .catch((e) => {
         console.error(e);
         setError("Failed to load products. Please try again.");
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setCategoriesLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -182,6 +186,44 @@ export default function Home() {
   const activeFilterCount = countActiveFilters(filters);
   const isDefault = filtersEqual(filters, DEFAULT_FILTERS) && !query.trim();
 
+  // Normalised list of { label, value } for the filter panel
+  const dynamicCategories = useMemo(
+    () => categoriesData.map((c) => ({ label: c.label, value: c.value ?? c.id })),
+    [categoriesData]
+  );
+
+  // Category quick-tags built from Firestore, merged with static tags
+  const quickTags = useMemo<QuickTag[]>(
+    () => [
+      ...STATIC_QUICK_TAGS,
+      ...categoriesData.map((c) => ({
+        label: c.label,
+        key: c.value ?? c.id,
+        field: "category",
+        value: c.value ?? c.id,
+      })),
+    ],
+    [categoriesData]
+  );
+
+  // Subcategories visible when a parent category is selected
+  const visibleSubcategories = useMemo(() => {
+    const subs: Array<{ label: string; value: string }> = [];
+    const seen = new Set<string>();
+    for (const cat of categoriesData) {
+      const catValue = cat.value ?? cat.id;
+      if (filters.categories.includes(catValue)) {
+        for (const sub of normaliseSubcategories(cat)) {
+          if (!seen.has(sub.value)) {
+            subs.push(sub);
+            seen.add(sub.value);
+          }
+        }
+      }
+    }
+    return subs;
+  }, [categoriesData, filters.categories]);
+
   const toggleFilter = <K extends keyof Omit<Filters, "priceIdx">>(key: K, value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -194,7 +236,7 @@ export default function Home() {
     setQuery("");
   };
 
-  const handleTagClick = (tag: typeof QUICK_TAGS[number]) => {
+  const handleTagClick = (tag: QuickTag) => {
     if (tag.key === "all") {
       resetFilters();
       return;
@@ -214,7 +256,7 @@ export default function Home() {
     toggleFilter(filterKey, tag.value);
   };
 
-  const isTagActive = (tag: typeof QUICK_TAGS[number]): boolean => {
+  const isTagActive = (tag: QuickTag): boolean => {
     if (tag.key === "all") return isDefault;
     if (!tag.field || !tag.value) return false;
     const fieldMap: Record<string, keyof Omit<Filters, "priceIdx">> = {
@@ -319,9 +361,9 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Quick tags — multi-select */}
+        {/* Quick tags — multi-select (static + dynamic categories) */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
-          {QUICK_TAGS.map((tag) => {
+          {quickTags.map((tag) => {
             const active = isTagActive(tag);
             return (
               <button
@@ -352,24 +394,56 @@ export default function Home() {
               <div className="bg-muted/50 border border-border rounded-2xl p-5 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
 
-                  {/* Category */}
+                  {/* Category — dynamic from Firestore */}
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Category</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {CATEGORIES.map((c) => (
-                        <button
-                          key={c.value}
-                          onClick={() => { toggleFilter("categories", c.value); }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                            filters.categories.includes(c.value)
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background border-border text-foreground hover:border-primary/40"
-                          }`}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
+                    {categoriesLoading ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                          <div key={i} className="h-7 w-16 rounded-xl bg-muted animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* Main category chips — consistent wrap layout */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {dynamicCategories.map((c) => (
+                            <button
+                              key={c.value}
+                              onClick={() => toggleFilter("categories", c.value)}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                                filters.categories.includes(c.value)
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background border-border text-foreground hover:border-primary/40"
+                              }`}
+                            >
+                              {c.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Subcategories — shown when a parent category is selected */}
+                        {visibleSubcategories.length > 0 && (
+                          <div className="pl-2 border-l-2 border-primary/20 space-y-1.5 pt-0.5">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Subcategory</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {visibleSubcategories.map((sub) => (
+                                <button
+                                  key={sub.value}
+                                  onClick={() => toggleFilter("categories", sub.value)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                                    filters.categories.includes(sub.value)
+                                      ? "bg-primary/80 text-primary-foreground border-primary/80"
+                                      : "bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                                  }`}
+                                >
+                                  {sub.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Ideal For */}

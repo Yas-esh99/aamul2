@@ -39,6 +39,19 @@ export interface MojdiDoc {
   img_url: string[];
 }
 
+export interface SubCategory {
+  label: string;
+  value: string;
+}
+
+export interface CategoryDoc {
+  id: string;             // doc ID, used as filter value if `value` not set
+  label: string;          // display name
+  value?: string;         // optional explicit filter value (falls back to id)
+  order?: number;         // optional sort order
+  subcategories?: SubCategory[] | string[];
+}
+
 const COLLECTION = "products";
 
 export async function fetchAllProducts(): Promise<Product[]> {
@@ -77,6 +90,21 @@ export async function fetchProductsByCategory(
 export async function fetchMojdiGallery(): Promise<MojdiDoc[]> {
   const snap = await getDocs(collection(db, "mojdi"));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as MojdiDoc));
+}
+
+export async function fetchCategories(): Promise<CategoryDoc[]> {
+  const snap = await getDocs(collection(db, "categories"));
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as CategoryDoc));
+  // Sort by `order` field if present, otherwise keep original order
+  return docs.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+}
+
+/** Normalise a CategoryDoc's subcategories to always be SubCategory[]. */
+export function normaliseSubcategories(cat: CategoryDoc): SubCategory[] {
+  if (!cat.subcategories?.length) return [];
+  return (cat.subcategories as Array<SubCategory | string>).map((s) =>
+    typeof s === "string" ? { label: s, value: s } : s
+  );
 }
 
 export function filterProducts(products: Product[], searchQuery: string): Product[] {
