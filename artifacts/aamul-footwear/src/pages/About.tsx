@@ -41,7 +41,7 @@ export default function About() {
           {[
             { icon: Calendar, value: "35+", label: "Years in Business" },
             { icon: Star, value: "1000+", label: "Happy Customers" },
-            { icon: Users, value: "3", label: "Family Members" },
+            { icon: Users, value: "3", label: "Business Members" },
             { icon: MapPin, value: "Anand", label: "Gujarat, India" },
           ].map(({ icon: Icon, value, label }) => (
             <motion.div
