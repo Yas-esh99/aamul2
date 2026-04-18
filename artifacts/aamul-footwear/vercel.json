@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm --filter @workspace/aamul-footwear run build",
+  "outputDirectory": "artifacts/aamul-footwear/dist/public",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
