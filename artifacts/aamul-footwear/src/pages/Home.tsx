@@ -316,14 +316,6 @@ export default function Home() {
             <p className="text-secondary/90 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light">
               We preserve the soulful art of traditional shoemaking. Earthy, beautiful, and made to last a lifetime.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" })}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-full font-medium text-lg hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
-            >
-              Shop Collection <ArrowRight className="w-5 h-5" />
-            </motion.button>
           </motion.div>
         </div>
       </section>
