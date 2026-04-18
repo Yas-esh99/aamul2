@@ -1,0 +1,31 @@
+01:51:52.497 
+01:51:52.812 
+failed to load config from /vercel/path0/artifacts/aamul-footwear/vite.config.ts
+01:51:52.815 
+error during build:
+01:51:52.815 
+Error: PORT environment variable is required but was not provided.
+01:51:52.815 
+    at file:///vercel/path0/artifacts/aamul-footwear/node_modules/.vite-temp/vite.config.ts.timestamp-1776543712685-354113385cb27.mjs:10:9
+01:51:52.815 
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+01:51:52.815 
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)
+01:51:52.816 
+    at async loadConfigFromBundledFile (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35909:12)
+01:51:52.816 
+    at async bundleAndLoadConfigFile (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35797:17)
+01:51:52.816 
+    at async loadConfigFromFile (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35764:42)
+01:51:52.816 
+    at async resolveConfig (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35413:22)
+01:51:52.816 
+    at async createBuilder (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:33875:19)
+01:51:52.816 
+    at async CAC.<anonymous> (file:///vercel/path0/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/cli.js:629:10)
+01:51:52.841 
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/aamul-footwear@0.0.0 build: `vite build --config vite.config.ts`
+01:51:52.841 
+Exit status 1
+01:51:52.857 
+Error: Command "pnpm --filter @workspace/aamul-footwear run build" exited with 1
