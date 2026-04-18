@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm --filter @workspace/aamul-footwear run build",
+  "outputDirectory": "artifacts/aamul-footwear/dist/public",
+  "env": {
+    "PORT": "3000",
+    "BASE_PATH": "/"
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
