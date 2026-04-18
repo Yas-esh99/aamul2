@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, CheckCircle, Phone, Mail, MessageSquare, ImagePlus, ChevronDown, X } from "lucide-react";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { fetchMojdiGallery, type MojdiDoc } from "@/lib/products";
 
 const PROCESS_STEPS = [
@@ -68,14 +70,26 @@ export default function HandmadeMojdi() {
       .finally(() => setGalleryLoading(false));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await addDoc(collection(db, "orders"), {
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        message: form.message,
+        completed: false,
+        submitted_at: serverTimestamp(),
+      });
       setSubmitted(true);
-      setSubmitting(false);
       setForm({ name: "", phone: "", email: "", message: "" });
-    }, 1200);
+    } catch (err) {
+      console.error("Failed to save order:", err);
+      alert("Something went wrong. Please try again or contact us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const previewGallery = gallery.slice(0, PREVIEW_COUNT);
