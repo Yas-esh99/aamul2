@@ -124,6 +124,27 @@ export function normaliseSubcategories(cat: CategoryDoc): SubCategory[] {
   );
 }
 
+/**
+ * Optimize a Cloudinary image URL by inserting f_auto, q_auto and width transforms.
+ * - Returns original URL untouched if it is not a Cloudinary URL.
+ * - Skips re-applying if a transform already exists.
+ */
+export function optimizeImageUrl(
+  url: string | undefined | null,
+  opts: { w?: number; h?: number } = {}
+): string {
+  if (!url) return "";
+  const m = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!m) return url;
+  // If a transform segment already starts the path (e.g. "f_auto,q_auto/v.../foo"), skip.
+  if (/^[a-z]_[^/]+\//.test(m[2])) return url;
+  const t = ["f_auto", "q_auto"];
+  if (opts.w) t.push(`w_${opts.w}`);
+  if (opts.h) t.push(`h_${opts.h}`);
+  t.push("c_limit");
+  return `${m[1]}${t.join(",")}/${m[2]}`;
+}
+
 export function filterProducts(products: Product[], searchQuery: string): Product[] {
   const q = searchQuery.toLowerCase();
   return products.filter(

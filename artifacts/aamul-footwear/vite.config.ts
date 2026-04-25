@@ -32,10 +32,26 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-  outDir: process.env.VERCEL
-    ? "dist" 
-    : path.resolve(import.meta.dirname, "dist/public"),
-  emptyOutDir: true,
+    outDir: process.env.VERCEL
+      ? "dist"
+      : path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true,
+    sourcemap: false,
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("firebase")) return "firebase";
+          if (id.includes("framer-motion")) return "motion";
+          if (id.includes("@radix-ui")) return "radix";
+          if (id.includes("react-icons") || id.includes("lucide-react"))
+            return "icons";
+          return "vendor";
+        },
+      },
+    },
   },
   server: {
     port,

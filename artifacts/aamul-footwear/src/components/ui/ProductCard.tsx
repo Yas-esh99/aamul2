@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ShoppingBag, Star, ArrowRight, Check } from "lucide-react";
 import { useLocation } from "wouter";
-import type { Product } from "@/lib/products";
+import { optimizeImageUrl, type Product } from "@/lib/products";
 import { useBag } from "@/context/BagContext";
 
 interface ProductCardProps {
@@ -26,7 +26,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
     if (!saved) addItem(product);
   };
 
-  const mainImage = product.img_url?.[0] ?? "";
+  const mainImage = optimizeImageUrl(product.img_url?.[0], { w: 600 });
 
   return (
     <motion.div
@@ -44,7 +44,11 @@ export function ProductCard({ product, index }: ProductCardProps) {
             src={mainImage}
             alt={product.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
+            loading={index < 3 ? "eager" : "lazy"}
+            decoding="async"
+            width={600}
+            height={750}
+            fetchPriority={index === 0 ? "high" : "auto"}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">

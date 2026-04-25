@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- ── Primary SEO ─────────────────────────────────────── -->
     <title>Aamul Footwear | Handcrafted Mojdi & Traditional Indian Footwear – Anand, Gujarat</title>
@@ -23,6 +23,9 @@
     <meta name="theme-color" content="#c2613a" />
     <meta name="msapplication-TileColor" content="#c2613a" />
     <meta name="msapplication-TileImage" content="/logo.png" />
+
+    <!-- ── Preload critical LCP image ─────────────────────── -->
+    <link rel="preload" as="image" href="/logo.png" fetchpriority="high" />
 
     <!-- ── Open Graph (Facebook / WhatsApp / LinkedIn) ──────── -->
     <meta property="og:type" content="website" />
@@ -53,11 +56,13 @@
       "url": "https://aamulfootwear.com",
       "logo": "https://aamulfootwear.com/logo.png",
       "image": "https://aamulfootwear.com/opengraph.jpg",
-      "telephone": "+91-98765-43210",
-      "email": "hello@aamulfootwear.com",
+      "telephone": "+91-9879098493",
+      "email": "aamulfootwear@gmail.com",
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": "Opp. Community Hall, Shantahari Complex, Bhathiji Mandir, Pioneer School Road",
         "addressLocality": "Anand",
+        "postalCode": "388001",
         "addressRegion": "Gujarat",
         "addressCountry": "IN"
       },
@@ -78,11 +83,12 @@
       "priceRange": "₹₹",
       "currenciesAccepted": "INR",
       "paymentAccepted": "Cash, UPI",
-      "areaServed": {
-        "@type": "Country",
-        "name": "India"
-      },
-      "sameAs": [],
+      "areaServed": { "@type": "Country", "name": "India" },
+      "sameAs": [
+        "https://www.instagram.com/aamul.footwear/",
+        "https://www.facebook.com/share/17xDpaxmJF/",
+        "https://www.linkedin.com/in/aamul-footwear-877110388"
+      ],
       "foundingDate": "1990",
       "keywords": "Mojdi, Jutti, handmade footwear, traditional Indian shoes, leather sandals, Kolhapuri, artisan shoes"
     }
@@ -100,10 +106,21 @@
     }
     </script>
 
-    <!-- ── Fonts ─────────────────────────────────────────────── -->
+    <!-- ── Fonts (consolidated, non-blocking) ───────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, CheckCircle, Phone, Mail, MessageSquare, ImagePlus, ChevronDown, X } from "lucide-react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { fetchMojdiGallery, type MojdiDoc } from "@/lib/products";
+import { fetchMojdiGallery, optimizeImageUrl, type MojdiDoc } from "@/lib/products";
 
 const PROCESS_STEPS = [
   {
@@ -167,13 +167,13 @@ export default function HandmadeMojdi() {
                 }`}
               >
                 {/* Image slot */}
-                <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border-2 border-dashed border-[#c2613a]/30 bg-[#c2613a]/5 flex flex-col items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#c2613a]/10 flex items-center justify-center">
-                    <ImagePlus className="w-5 h-5 text-[#c2613a]/50" />
+                <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border-2 border-dashed border-[#c2613a]/40 bg-[#c2613a]/5 flex flex-col items-center justify-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#c2613a]/15 flex items-center justify-center">
+                    <ImagePlus className="w-5 h-5 text-[#c2613a]" aria-hidden="true" />
                   </div>
-                  <p className="text-[#c2613a]/50 text-sm font-medium">Step {step.step} image</p>
-                  <p className="text-[#c2613a]/35 text-xs">Add image here</p>
-                  <span className="absolute bottom-4 right-5 font-display text-7xl font-bold text-[#c2613a]/8 select-none leading-none">
+                  <p className="text-[#8b4513] text-sm font-semibold">Step {step.step} image</p>
+                  <p className="text-[#8b4513]/80 text-xs">Add image here</p>
+                  <span className="absolute bottom-4 right-5 font-display text-7xl font-bold text-[#c2613a]/15 select-none leading-none" aria-hidden="true">
                     {step.step}
                   </span>
                 </div>
@@ -230,10 +230,14 @@ export default function HandmadeMojdi() {
                 >
                   <div className="relative overflow-hidden">
                     <img
-                      src={url}
+                      src={optimizeImageUrl(url, { w: 600 })}
                       alt={`Mojdi ${i + 1}`}
                       className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
+                      loading={i < 4 ? "eager" : "lazy"}
+                      decoding="async"
+                      width={600}
+                      height={750}
+                      fetchPriority={i === 0 ? "high" : "auto"}
                     />
                     <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300" />
                   </div>
@@ -423,10 +427,13 @@ export default function HandmadeMojdi() {
                 >
                   <div className="relative overflow-hidden">
                     <img
-                      src={url}
+                      src={optimizeImageUrl(url, { w: 600 })}
                       alt={`Mojdi ${PREVIEW_COUNT + i + 1}`}
                       className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
+                      width={600}
+                      height={750}
                     />
                     <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300" />
                   </div>
@@ -441,7 +448,7 @@ export default function HandmadeMojdi() {
                 className="flex flex-col items-center gap-2 mt-12"
               >
                 <p className="text-sm text-muted-foreground">
-                  Showing {Math.min(visibleExtra, extraGallery.length)} of {extraGallery.length} more pieces
+                  Showing {visibleExtra.length} of {extraGallery.length} more pieces
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.03 }}
@@ -481,7 +488,7 @@ export default function HandmadeMojdi() {
 
             {/* Image */}
             <motion.img
-              src={lightboxImage}
+              src={optimizeImageUrl(lightboxImage, { w: 1600 })}
               alt="Mojdi full view"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
