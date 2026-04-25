@@ -36,6 +36,10 @@ export default function Navbar() {
             <img
               src={logoUrl}
               alt="Aamul Footwear"
+              width={40}
+              height={40}
+              fetchPriority="high"
+              decoding="async"
               className="h-10 w-auto object-contain"
             />
             <div className="hidden sm:block">
@@ -116,7 +120,7 @@ export default function Navbar() {
           >
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-2">
-                <img src={logoUrl} alt="Aamul Footwear" className="h-9 w-auto" />
+                <img src={logoUrl} alt="Aamul Footwear" width={36} height={36} className="h-9 w-auto" />
                 <span className="font-display text-xl font-bold">Aamul Footwear</span>
               </div>
               <button

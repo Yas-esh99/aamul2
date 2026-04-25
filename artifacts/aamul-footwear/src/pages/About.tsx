@@ -72,9 +72,13 @@ export default function About() {
             className="rounded-3xl overflow-hidden shadow-2xl relative aspect-[4/5]"
           >
             <img
-              src={`${import.meta.env.BASE_URL}images/about-workshop.png`}
+              src={`${import.meta.env.BASE_URL}images/about-workshop.webp`}
               alt="Our Workshop"
               className="w-full h-full object-cover"
+              width={1200}
+              height={1500}
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 border-4 border-background/20 rounded-3xl m-4 pointer-events-none" />
           </motion.div>

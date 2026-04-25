@@ -56,7 +56,7 @@
   --popover-foreground: 36 20% 15%;
   --popover-border: 38 41% 92%;
   
-  --primary: 13 53% 50%; /* #C05C3F Terracotta */
+  --primary: 13 56% 44%; /* #B0492C Terracotta (AA contrast) */
   --primary-foreground: 0 0% 100%;
   
   --secondary: 33 42% 84%; /* #E8DCC4 Sand */
@@ -65,7 +65,7 @@
   --muted: 38 41% 92%; /* #F3EDE0 Soft Cream */
   --muted-foreground: 30 14% 32%; /* #5E5345 Earthy Gray (AA contrast) */
   
-  --accent: 13 53% 50%;
+  --accent: 13 56% 44%;
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 84% 60%;
@@ -73,7 +73,7 @@
   
   --border: 38 41% 92%;
   --input: 38 41% 92%;
-  --ring: 13 53% 50%;
+  --ring: 13 56% 44%;
   
   --radius: 0.5rem;
 }

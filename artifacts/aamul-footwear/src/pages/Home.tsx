@@ -301,9 +301,14 @@ export default function Home() {
       <section className="relative h-[85vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-foreground">
           <img
-            src={`${import.meta.env.BASE_URL}images/hero-artisan.png`}
+            src={`${import.meta.env.BASE_URL}images/hero-artisan.webp`}
             alt="Artisan leather workshop"
             className="w-full h-full object-cover opacity-60"
+            width={1600}
+            height={900}
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
         </div>
